@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum JobType {
+  commit_scan
+}
+
+enum JobStatus {
+  queued
+  running
+  completed
+  failed
+}
+
+model Job {
+  id        String    @id @default(cuid())
+  userLogin String
+  type      JobType
+  status    JobStatus @default(queued)
+  progress  Int       @default(0)
+  total     Int?
+  message   String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userLogin, createdAt])
+}
+
+model Snapshot {
+  id        String   @id @default(cuid())
+  userLogin String
+  org       String
+  year      Int
+  timezone  String
+
+  from       DateTime
+  to         DateTime
+  computedAt DateTime
+
+  totals        Json
+  byRepo        Json
+  byWeek        Json
+  commitsStatus String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userLogin, org, year])
+  @@index([org, year])
+}
