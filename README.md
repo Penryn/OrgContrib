@@ -6,6 +6,31 @@
 
 需求与口径：`docs/PROJECT_SPEC.md`。
 
+## Docker 一键部署（Web + Worker + Postgres + Redis）
+
+1) 准备环境变量
+
+```bash
+cp .env.example .env
+```
+
+至少需要配置：
+- `GITHUB_CLIENT_ID`
+- `GITHUB_CLIENT_SECRET`
+- `NEXTAUTH_SECRET`
+
+2) 启动
+
+```bash
+docker compose -f docker-compose.deploy.yml up -d --build
+```
+
+3) 打开
+
+- `http://localhost:3000`
+
+> 说明：`docker-compose.deploy.yml` 会自动执行 Prisma migrations（`prisma migrate deploy`），并启动 worker 用于 Commit 扫描任务。
+
 ## 本地开发
 
 ### 1) 环境变量
@@ -75,3 +100,4 @@ npm run dev
 - `src/worker/index.ts`：BullMQ worker（Commit 全分支扫描）
 - `prisma/schema.prisma`：Job/Snapshot 数据模型
 - `docker-compose.yml`：Postgres + Redis
+- `docker-compose.deploy.yml`：一键部署（Web + Worker + Postgres + Redis）

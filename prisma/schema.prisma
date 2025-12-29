@@ -55,3 +55,21 @@ model Snapshot {
   @@unique([userLogin, org, year])
   @@index([org, year])
 }
+
+model AiCommentaryCache {
+  id        String   @id @default(cuid())
+  userLogin String
+  org       String
+  date      String // YYYY-MM-DD (Asia/Shanghai)
+
+  source     String
+  commentary Json
+  metrics    Json
+  error      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userLogin, org, date])
+  @@index([org, date])
+}

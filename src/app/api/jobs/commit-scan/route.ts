@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { githubGraphql } from "@/lib/github";
 import type { CommitScanJobData } from "@/lib/jobs";
-import { commitScanQueue } from "@/lib/queue";
+import { getCommitScanQueue } from "@/lib/queue";
 import { getShanghaiYear, getShanghaiYearStartUtc } from "@/lib/time";
 
 export const runtime = "nodejs";
@@ -136,6 +136,7 @@ export async function POST() {
     authorEmails,
   };
 
+  const commitScanQueue = getCommitScanQueue();
   await commitScanQueue.add("commit_scan", payload, {
     jobId: job.id,
     removeOnComplete: 50,
