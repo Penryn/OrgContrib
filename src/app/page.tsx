@@ -21,12 +21,11 @@ export default async function Home() {
   const session = await auth();
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-50 px-6 py-12 text-zinc-900 sm:px-12">
-      {/* Subtle Background */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-[20%] -top-[20%] h-[600px] w-[600px] rounded-full bg-orange-100/40 blur-[120px]" />
-        <div className="absolute -bottom-[20%] -right-[20%] h-[600px] w-[600px] rounded-full bg-red-100/40 blur-[120px]" />
-        <div className="absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60 blur-[100px]" />
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-orange-50 via-red-50 to-amber-50 px-6 py-12 text-zinc-900 sm:px-12">
+      {/* Decorative background elements */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute left-1/4 top-20 h-96 w-96 rounded-full bg-gradient-to-br from-red-200/30 to-orange-200/30 blur-3xl" />
+        <div className="absolute right-1/4 bottom-20 h-96 w-96 rounded-full bg-gradient-to-br from-amber-200/30 to-yellow-200/30 blur-3xl" />
       </div>
 
       <div className="relative z-10 flex w-full max-w-2xl flex-col items-center gap-10 text-center">
@@ -53,7 +52,7 @@ export default async function Home() {
         {/* Main Action Card */}
         <div className="w-full max-w-sm animate-fadeIn [animation-delay:200ms]">
           {session ? (
-            <div className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-8 shadow-xl transition-all hover:shadow-2xl hover:-translate-y-0.5">
+            <div className="group relative overflow-hidden rounded-2xl border border-orange-200 bg-white p-8 shadow-xl transition-all hover:shadow-2xl hover:-translate-y-0.5">
               <div className="relative flex flex-col items-center gap-6">
                 <div className="flex flex-col items-center gap-3">
                   <div className="h-20 w-20 overflow-hidden rounded-full border-4 border-orange-50 shadow-sm">
@@ -76,7 +75,7 @@ export default async function Home() {
                 <div className="flex w-full flex-col gap-3">
                   <Link
                     href="/dashboard"
-                    className="group/btn relative flex h-11 w-full items-center justify-center overflow-hidden rounded-lg bg-zinc-900 text-sm font-medium text-white shadow-md transition-all hover:bg-zinc-800 hover:shadow-lg"
+                    className="group/btn relative flex h-11 w-full items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-orange-600 to-red-600 text-sm font-medium text-white shadow-md transition-all hover:from-orange-700 hover:to-red-700 hover:shadow-lg"
                   >
                     <span className="relative z-10 flex items-center gap-2">
                       查看我的年度报告
@@ -104,7 +103,7 @@ export default async function Home() {
               </div>
             </div>
           ) : (
-            <div className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-8 shadow-xl transition-all hover:shadow-2xl hover:-translate-y-0.5">
+            <div className="group relative overflow-hidden rounded-2xl border border-orange-200 bg-white p-8 shadow-xl transition-all hover:shadow-2xl hover:-translate-y-0.5">
               <div className="relative flex flex-col items-center gap-6 text-center">
                 <div className="rounded-2xl bg-orange-50 p-4 ring-1 ring-orange-100">
                   <ChartIcon className="h-8 w-8 text-orange-600" />

@@ -473,7 +473,7 @@ export function OrgCacheDashboard() {
                           <div className="relative flex flex-col justify-center overflow-hidden rounded-xl bg-gradient-to-br from-orange-50 to-red-50 p-6 shadow-sm ring-1 ring-orange-100 transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
                             <div className="text-center pb-2">
                               <div className="text-sm font-bold text-orange-600 uppercase tracking-wider">总排名</div>
-                              <div className="mt-3 text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-red-600 to-orange-600 transition-transform duration-300 hover:scale-110">
+                              <div className="mt-1 text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-red-600 to-orange-600 transition-transform duration-300 hover:scale-110">
                                 Top {formatTopPercent(ranking.percentile)}%
                               </div>
                               <div className="mt-3 text-base font-semibold text-zinc-700">
