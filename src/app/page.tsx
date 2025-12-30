@@ -16,7 +16,7 @@ export default async function Home() {
       <div className="relative mx-auto flex w-full max-w-3xl flex-col gap-10 px-6 py-16">
         <header className="flex flex-col gap-3">
           <h1 className="bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent">
-            🎉 zjutjh 组织贡献看板（今年）
+            zjutjh 组织贡献看板（今年）
           </h1>
           <p className="text-base leading-7 text-zinc-700">
             先同步今年 <span className="font-semibold text-red-600">zjutjh/*</span> 仓库的 PR 与 Commit 记录（按 Asia/Shanghai），然后按人/仓库快速查看贡献并生成年度报告。
@@ -25,7 +25,7 @@ export default async function Home() {
 
         {session ? (
           <section className="overflow-hidden rounded-xl border border-orange-200 bg-gradient-to-br from-white to-orange-50/50 p-6 shadow-lg ring-1 ring-orange-100">
-            <div className="text-sm font-medium text-orange-600">已登录 ✨</div>
+            <div className="text-sm font-medium text-orange-600">已登录</div>
             <div className="mt-1 text-lg font-semibold text-zinc-900">
               {session.user?.name ?? session.user?.email ?? "GitHub 用户"}
             </div>
@@ -67,7 +67,7 @@ export default async function Home() {
                 type="submit"
                 className="inline-flex h-10 items-center justify-center rounded-lg bg-gradient-to-r from-red-600 to-orange-600 px-4 text-sm font-medium text-white shadow-md transition-all hover:from-red-700 hover:to-orange-700 hover:shadow-lg hover:-translate-y-0.5"
               >
-                🚀 使用 GitHub 登录
+                使用 GitHub 登录
               </button>
             </form>
             <p className="mt-3 text-sm text-zinc-600">
