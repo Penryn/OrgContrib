@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "zjutjh 个人贡献看板（今年）",
+  title: "精弘年度报告",
   description: "查看你在 zjutjh/* 仓库的今年贡献（commits/PR/reviews）并生成统计点评。",
 };
 

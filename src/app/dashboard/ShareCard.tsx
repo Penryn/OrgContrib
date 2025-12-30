@@ -210,7 +210,7 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
                 AI Summary
               </div>
               <div
-                className="relative flex flex-col items-center justify-center rounded-xl bg-white/10 px-8 py-10 text-center text-sm font-medium leading-relaxed text-orange-50 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
+                className="relative flex flex-col justify-center rounded-xl bg-white/10 px-8 py-10 text-left text-sm font-medium leading-relaxed text-orange-50 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
               >
                 <span
                   className={`pointer-events-none select-none absolute left-4 top-2 text-5xl ${
