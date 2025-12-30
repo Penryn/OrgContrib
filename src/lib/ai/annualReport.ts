@@ -140,15 +140,16 @@ export async function generateAiAnnualReport(metrics: AnnualReportMetrics): Prom
   const system: ChatMessage = {
     role: "system",
     content:
-      "你是一个轻松、靠谱的工程成长搭子。" +
+      "你是一个活泼、靠谱的年度总结小助手 ✨。" +
       "你只根据用户提供的 metrics 里的数字与字段来写年度回顾，绝对不要猜、不要脑补。" +
-      "语气自然一点，像在帮对方做年终复盘：先夸具体的地方，再给温和、可执行的小建议；别用模板口号、别像绩效评语。" +
+      "语气要轻松活泼，像朋友之间聊天那样～多用点 emoji 表情增加趣味性 🎉。" +
+      "夸人的时候要具体、真诚；给建议的时候要温和、接地气，别搞那些大道理和模板话术。" +
       "你看不到代码与上下文：不要评价代码质量/技术水平；也不要输出任何仓库名、PR 标题、commit message 或你编出来的例子。" +
-      "如果 metrics 里某个字段是 null 或缺失，就当作“无法判断”，不要硬推结论。" +
+      "如果 metrics 里某个字段是 null 或缺失，就当作\"无法判断\"，不要硬推结论。" +
       "输出必须是严格 JSON（不要 Markdown、不要代码块、不要多余文字），字段固定为：" +
       "summary(string), highlights(string[]), risks(string[]), actions(string[]), confidence(number 0~1)。" +
-      "summary 2~4 句，像一段自然的回顾；highlights 2~4 条（每条尽量带上数字）；" +
-      "risks 1~3 条（说成“提醒/可能的坑”）；actions 3~5 条（具体、可执行、尽量可量化：频率/周期/数量）。" +
+      "summary 2~4 句，要有点小俏皮、轻松的感觉，可以适当用 emoji；highlights 2~4 条（每条尽量带上数字和 emoji）；" +
+      "risks 1~3 条（说成\"小提醒/注意点\"，语气温和点）；actions 3~5 条（具体、可执行、尽量可量化：频率/周期/数量，也可以加 emoji）。" +
       "confidence 依据数据完整度与一致性给分：数据越完整越高，信息越缺越低。"
   };
 
@@ -180,41 +181,41 @@ export function fallbackAnnualReport(metrics: AnnualReportMetrics): AiCommentary
   const total = metrics.totals.prs + metrics.totals.reviewedPrs + metrics.totals.commits;
 
   const highlights: string[] = [];
-  if (metrics.totals.prs > 0) highlights.push(`今年产出 PR ${metrics.totals.prs} 个，保持了可见的协作输出`);
-  if (metrics.totals.reviewedPrs > 0) highlights.push(`今年 review 了他人 PR ${metrics.totals.reviewedPrs} 个，协作参与度不错`);
-  if (metrics.totals.commits > 0) highlights.push(`今年有 Commit 记录 ${metrics.totals.commits} 次，持续推动落地`);
-  if (metrics.totals.contributingRepos > 0) highlights.push(`覆盖仓库数 ${metrics.totals.contributingRepos}，有一定的协作广度`);
+  if (metrics.totals.prs > 0) highlights.push(`🎯 今年产出了 ${metrics.totals.prs} 个 PR，保持了不错的协作输出节奏呢！`);
+  if (metrics.totals.reviewedPrs > 0) highlights.push(`👀 Review 了 ${metrics.totals.reviewedPrs} 个 PR，协作参与度很赞哦～`);
+  if (metrics.totals.commits > 0) highlights.push(`💻 提交了 ${metrics.totals.commits} 次 Commit，持续推动项目落地！`);
+  if (metrics.totals.contributingRepos > 0) highlights.push(`📦 覆盖了 ${metrics.totals.contributingRepos} 个仓库，协作广度不错！`);
 
   const risks: string[] = [];
-  if (total === 0) risks.push("今年暂无贡献记录：请先完成一次年度同步，或确认统计口径与权限范围");
+  if (total === 0) risks.push("今年暂无贡献记录哦～可能需要先完成一次年度同步，或确认一下统计口径与权限范围");
   if (metrics.repos.top1Share !== null && metrics.repos.top1Share >= 0.85) {
-    risks.push("贡献集中度较高：建议在保持主阵地投入的同时，适度扩展到相关仓库以提升协作影响力");
+    risks.push("贡献有点集中在单个仓库啦，在保持主阵地投入的同时，适度扩展到相关仓库会更好哦");
   }
   if (metrics.mix.reviewToPrRatio !== null && metrics.mix.reviewToPrRatio < 0.3 && metrics.totals.prs > 0) {
-    risks.push("review 参与度偏低：建议在保持产出的同时，每周固定做一次小而快的 review");
+    risks.push("Review 参与度偏低了点，建议在保持产出的同时，每周固定做一次小而快的 review～");
   }
 
   const actions: string[] = [];
   if (total === 0) {
-    actions.push("从 1 个仓库开始：先完成一个小而闭环的 PR（文档/脚本/修复）");
-    actions.push("设定节奏：例如每两周 1 个可合并 PR，并在周末做一次复盘");
-    actions.push("把常见问题沉淀为模板/脚手架，降低后续改动成本");
+    actions.push("从 1 个仓库开始：先完成一个小而闭环的 PR（文档/脚本/修复都可以）🚀");
+    actions.push("设定节奏：例如每两周 1 个可合并 PR，并在周末做一次复盘 ✍️");
+    actions.push("把常见问题沉淀为模板/脚手架，降低后续改动成本 💡");
   } else {
-    actions.push("保持稳定节奏：把年度目标拆成月目标（例如每月 2~4 个 PR）");
+    actions.push("保持稳定节奏：把年度目标拆成月目标（例如每月 2~4 个 PR）📅");
     if (metrics.totals.reviewedPrs === 0) {
-      actions.push("从 1 次 review 开始：优先挑小 PR，在 24~48 小时内给到可执行反馈");
+      actions.push("从 1 次 review 开始：优先挑小 PR，在 24~48 小时内给到可执行反馈 ⏰");
     } else {
-      actions.push("继续做“可复用”的 review：把高频问题沉淀为 checklist/模板，提升团队效率");
+      actions.push("继续做可复用的 review：把高频问题沉淀为 checklist/模板，提升团队效率 ✨");
     }
-    actions.push("提升影响力：选 1~2 次贡献做复盘，总结可复用的规范/自动化脚本");
-    actions.push("提高可维护性：对关键模块补充最小验证（README 步骤/脚本/测试三选一）");
-    actions.push("扩大协作面：在相邻仓库做一次小改动或协助修复，形成跨仓库影响力");
+    actions.push("提升影响力：选 1~2 次贡献做复盘，总结可复用的规范/自动化脚本 📝");
+    actions.push("提高可维护性：对关键模块补充最小验证（README 步骤/脚本/测试三选一）🔧");
+    actions.push("扩大协作面：在相邻仓库做一次小改动或协助修复，形成跨仓库影响力 🌟");
   }
 
   return {
     summary:
-      `这是基于统计指标生成的 ${metrics.year} 年度贡献报告（范围：${metrics.org}，${metrics.timezone}）。` +
-      (total > 0 ? "整体看你保持了持续的产出节奏。" : "目前统计显示贡献为 0，建议先确认同步状态与权限范围。"),
+      `这是基于统计指标生成的 ${metrics.year} 年度贡献报告（范围：${metrics.org}，${metrics.timezone}）🎉 ` +
+      (total > 0 ? "整体看你保持了持续的产出节奏，继续加油！💪" : "目前统计显示贡献为 0，建议先确认同步状态与权限范围～"),
     highlights,
     risks,
     actions,

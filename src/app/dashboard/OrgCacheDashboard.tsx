@@ -95,7 +95,7 @@ type AnnualReportResponse = {
 
 const Icons = {
   PR: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
       <circle cx="18" cy="18" r="3"></circle>
       <circle cx="6" cy="6" r="3"></circle>
       <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
@@ -103,20 +103,20 @@ const Icons = {
     </svg>
   ),
   Review: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-500">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-600">
       <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
       <circle cx="12" cy="12" r="3"></circle>
     </svg>
   ),
   Commit: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600">
       <circle cx="12" cy="12" r="3"></circle>
       <line x1="3" y1="12" x2="9" y2="12"></line>
       <line x1="15" y1="12" x2="21" y2="12"></line>
     </svg>
   ),
   Repo: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-600">
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
     </svg>
@@ -127,7 +127,7 @@ const Icons = {
     </svg>
   ),
   Loader: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin text-blue-500">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin text-orange-500">
       <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
     </svg>
   ),
@@ -137,16 +137,16 @@ function StatusBadge(props: { status: CacheStatus }) {
   const config = (() => {
     switch (props.status) {
       case "completed":
-        return { color: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "已完成" };
+        return { color: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "✅ 已完成" };
       case "running":
-        return { color: "bg-blue-50 text-blue-700 border-blue-200", label: "同步中" };
+        return { color: "bg-orange-50 text-orange-700 border-orange-200", label: "🔄 同步中" };
       case "queued":
-        return { color: "bg-amber-50 text-amber-700 border-amber-200", label: "排队中" };
+        return { color: "bg-amber-50 text-amber-700 border-amber-200", label: "⏳ 排队中" };
       case "failed":
-        return { color: "bg-rose-50 text-rose-700 border-rose-200", label: "失败" };
+        return { color: "bg-rose-50 text-rose-700 border-rose-200", label: "❌ 失败" };
       case "not_started":
       default:
-        return { color: "bg-zinc-50 text-zinc-700 border-zinc-200", label: "未开始" };
+        return { color: "bg-zinc-50 text-zinc-700 border-zinc-200", label: "⚪ 未开始" };
     }
   })();
 
@@ -160,22 +160,22 @@ function StatusBadge(props: { status: CacheStatus }) {
 
 function StatCard(props: { label: string; value: string; hint?: string; icon?: React.ReactNode }) {
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover:border-zinc-300 hover:shadow-md hover:-translate-y-0.5">
-      {/* Subtle gradient overlay on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-zinc-50/0 to-zinc-100/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+    <div className="group relative overflow-hidden rounded-xl border border-orange-200 bg-gradient-to-br from-white to-orange-50/40 p-5 shadow-md transition-all duration-300 hover:border-orange-300 hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]">
+      {/* Festive gradient overlay on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-red-50/0 via-orange-50/0 to-amber-50/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       
       <div className="relative flex items-start justify-between">
         <div>
-          <div className="text-sm font-medium text-zinc-500 transition-colors duration-300 group-hover:text-zinc-700">{props.label}</div>
-          <div className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 transition-all duration-300 group-hover:scale-105">{props.value}</div>
+          <div className="text-sm font-semibold text-orange-600 transition-colors duration-300 group-hover:text-red-600">{props.label}</div>
+          <div className="mt-2 bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent transition-all duration-300 group-hover:scale-110">{props.value}</div>
         </div>
         {props.icon && (
-          <div className="rounded-lg bg-zinc-50 p-2 ring-1 ring-zinc-100 transition-all duration-300 group-hover:bg-zinc-100 group-hover:ring-zinc-200 group-hover:scale-110">
+          <div className="rounded-lg bg-gradient-to-br from-orange-100 to-red-100 p-2 ring-1 ring-orange-200 transition-all duration-300 group-hover:bg-gradient-to-br group-hover:from-red-200 group-hover:to-orange-200 group-hover:ring-red-300 group-hover:scale-110 group-hover:rotate-6">
             {props.icon}
           </div>
         )}
       </div>
-      {props.hint ? <div className="relative mt-3 text-xs text-zinc-400 transition-colors duration-300 group-hover:text-zinc-500">{props.hint}</div> : null}
+      {props.hint ? <div className="relative mt-3 text-xs font-medium text-orange-500 transition-colors duration-300 group-hover:text-red-600">{props.hint}</div> : null}
     </div>
   );
 }
@@ -331,14 +331,14 @@ export function OrgCacheDashboard() {
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-zinc-200 bg-zinc-50/50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <section className="overflow-hidden rounded-xl border border-orange-200 bg-white shadow-lg">
+        <div className="flex flex-col gap-3 border-b border-orange-200 bg-gradient-to-r from-orange-50 via-red-50 to-amber-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="font-semibold text-zinc-900">{title}</h2>
+              <h2 className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text font-bold text-transparent">{title}</h2>
               {status ? <StatusBadge status={status.status} /> : null}
             </div>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1 text-xs font-medium text-orange-600">
               服务启动时自动同步（全仓库、全分支去重），完成后可查看个人贡献。
             </p>
           </div>
@@ -353,42 +353,42 @@ export function OrgCacheDashboard() {
           ) : null}
 
           {!status ? (
-            <div className="flex items-center gap-2 text-zinc-500">
+            <div className="flex items-center gap-2 text-orange-500">
               <Icons.Loader />
               <span>加载状态中…</span>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
               <div className="flex flex-col gap-1">
-                <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Organization</span>
+                <span className="text-xs font-medium text-red-600 uppercase tracking-wider">Organization</span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-lg font-semibold text-zinc-900">{status.org}</span>
-                  <span className="text-sm text-zinc-500">{status.year}</span>
+                  <span className="text-sm text-orange-600">{status.year}</span>
                 </div>
               </div>
               
               <div className="flex flex-col gap-1">
-                <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Sync Progress</span>
+                <span className="text-xs font-medium text-red-600 uppercase tracking-wider">Sync Progress</span>
                 <div className="flex items-center gap-3">
-                  <div className="h-2 w-full max-w-[120px] overflow-hidden rounded-full bg-zinc-100">
+                  <div className="h-2 w-full max-w-[120px] overflow-hidden rounded-full bg-orange-100">
                     <div 
-                      className="h-full bg-zinc-900 transition-all duration-500 ease-out" 
+                      className="h-full bg-gradient-to-r from-red-600 to-orange-600 transition-all duration-500 ease-out" 
                       style={{ width: `${status.progress}%` }} 
                     />
                   </div>
-                  <span className="font-medium text-zinc-900">{status.progress}%</span>
+                  <span className="font-bold text-orange-600">{status.progress}%</span>
                 </div>
                 {typeof status.totalRepos === "number" ? (
-                  <span className="text-xs text-zinc-400">Scanned {status.totalRepos} repositories</span>
+                  <span className="text-xs text-orange-500">Scanned {status.totalRepos} repositories</span>
                 ) : null}
               </div>
 
               <div className="flex flex-col gap-1">
-                <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Last Update</span>
-                <div className="text-sm text-zinc-900">
+                <span className="text-xs font-medium text-red-600 uppercase tracking-wider">Last Update</span>
+                <div className="text-sm font-semibold text-zinc-900">
                   {status.computedAt ? new Date(status.computedAt).toLocaleString("zh-CN") : "Pending..."}
                 </div>
-                {status.message ? <div className="truncate text-xs text-zinc-400" title={status.message}>{status.message}</div> : null}
+                {status.message ? <div className="truncate text-xs text-orange-500" title={status.message}>{status.message}</div> : null}
               </div>
             </div>
           )}
@@ -413,20 +413,22 @@ export function OrgCacheDashboard() {
         <section className="flex flex-col gap-8">
           <section>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-zinc-900">我的贡献</h2>
-              <span className="text-xs text-zinc-500">基于你有权限访问的仓库</span>
+              <h2 className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-lg font-bold text-transparent">
+                ✨ 我的贡献
+              </h2>
+              <span className="text-xs font-medium text-orange-600">基于你有权限访问的仓库</span>
             </div>
 
             <div className="text-sm">
               {meLoading ? (
-                <div className="flex items-center gap-2 text-zinc-500 py-8">
+                <div className="flex items-center gap-2 text-orange-500 py-8">
                   <Icons.Loader />
                   <span>正在加载贡献数据...</span>
                 </div>
               ) : meError ? (
                 <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-rose-900">加载失败：{meError}</div>
               ) : !me ? (
-                <div className="text-zinc-500 py-8">暂无数据。</div>
+                <div className="text-orange-500 py-8">暂无数据。</div>
               ) : (
                 <div className="flex flex-col gap-8">
                   <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -458,52 +460,57 @@ export function OrgCacheDashboard() {
 
                   {/* Ranking Section */}
                   {ranking && ranking.rank > 0 ? (
-                    <section className="overflow-hidden rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 shadow-sm animate-fadeIn">
-                      <div className="border-b border-amber-200 px-6 py-4">
-                        <h3 className="font-semibold text-amber-900">🏆 贡献者排名</h3>
+                    <section className="overflow-hidden rounded-xl border-2 border-yellow-300 bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 shadow-lg ring-2 ring-yellow-200/50 animate-fadeIn">
+                      <div className="border-b border-yellow-300 bg-gradient-to-r from-yellow-100/80 to-amber-100/80 px-6 py-4">
+                        <h3 className="flex items-center gap-2 text-lg font-bold text-amber-900">
+                          <span className="text-2xl">🏆</span>
+                          贡献者排名
+                        </h3>
                       </div>
                       <div className="px-6 py-6">
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                          <div className="rounded-xl bg-white/60 p-6 shadow-sm ring-1 ring-amber-100 transition-all duration-300 hover:shadow-md hover:ring-amber-200">
+                          <div className="rounded-xl bg-gradient-to-br from-yellow-100 to-amber-100 p-6 shadow-md ring-2 ring-yellow-300 transition-all duration-300 hover:shadow-xl hover:ring-yellow-400 hover:scale-[1.02]">
                             <div className="text-center">
-                              <div className="text-sm font-medium text-amber-600 uppercase tracking-wider">总排名</div>
-                              <div className="mt-3 text-5xl font-bold text-amber-900 transition-transform duration-300 hover:scale-110">Top {ranking.percentile}%</div>
-                              <div className="mt-2 text-sm text-amber-700">
+                              <div className="text-sm font-bold text-amber-700 uppercase tracking-wider">✨ 总排名 ✨</div>
+                              <div className="mt-3 bg-gradient-to-r from-yellow-600 via-amber-600 to-orange-600 bg-clip-text text-6xl font-extrabold text-transparent transition-transform duration-300 hover:scale-110">
+                                Top {ranking.percentile}%
+                              </div>
+                              <div className="mt-3 text-base font-semibold text-amber-800">
                                 第 {ranking.rank} 名 / 共 {ranking.totalUsers} 人
                               </div>
-                              <div className="mt-4 h-2 overflow-hidden rounded-full bg-amber-100">
+                              <div className="mt-5 h-3 overflow-hidden rounded-full bg-amber-200 shadow-inner">
                                 <div
-                                  className="h-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all duration-500"
+                                  className="h-full bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 shadow-lg transition-all duration-500"
                                   style={{ width: `${100 - ranking.percentile}%` }}
                                 />
                               </div>
                             </div>
                           </div>
                           <div className="grid grid-cols-1 gap-3">
-                            <div className="rounded-xl bg-white/60 p-4 shadow-sm ring-1 ring-purple-100 transition-all duration-300 hover:shadow-md hover:ring-purple-200 hover:-translate-y-0.5">
+                            <div className="rounded-xl bg-gradient-to-br from-red-100 to-pink-100 p-4 shadow-md ring-2 ring-red-200 transition-all duration-300 hover:shadow-lg hover:ring-red-300 hover:-translate-y-0.5">
                               <div className="flex items-center justify-between">
-                                <div className="text-xs font-medium text-purple-600 uppercase tracking-wider">PR 排名</div>
+                                <div className="text-xs font-bold text-red-700 uppercase tracking-wider">PR 排名</div>
                                 <Icons.PR />
                               </div>
-                              <div className="mt-2 text-2xl font-bold text-purple-900">
+                              <div className="mt-2 text-3xl font-extrabold text-red-700">
                                 #{ranking.prRank.rank}
                               </div>
                             </div>
-                            <div className="rounded-xl bg-white/60 p-4 shadow-sm ring-1 ring-orange-100 transition-all duration-300 hover:shadow-md hover:ring-orange-200 hover:-translate-y-0.5">
+                            <div className="rounded-xl bg-gradient-to-br from-orange-100 to-amber-100 p-4 shadow-md ring-2 ring-orange-200 transition-all duration-300 hover:shadow-lg hover:ring-orange-300 hover:-translate-y-0.5">
                               <div className="flex items-center justify-between">
-                                <div className="text-xs font-medium text-orange-600 uppercase tracking-wider">Review 排名</div>
+                                <div className="text-xs font-bold text-orange-700 uppercase tracking-wider">Review 排名</div>
                                 <Icons.Review />
                               </div>
-                              <div className="mt-2 text-2xl font-bold text-orange-900">
+                              <div className="mt-2 text-3xl font-extrabold text-orange-700">
                                 #{ranking.reviewRank.rank}
                               </div>
                             </div>
-                            <div className="rounded-xl bg-white/60 p-4 shadow-sm ring-1 ring-blue-100 transition-all duration-300 hover:shadow-md hover:ring-blue-200 hover:-translate-y-0.5">
+                            <div className="rounded-xl bg-gradient-to-br from-amber-100 to-yellow-100 p-4 shadow-md ring-2 ring-amber-200 transition-all duration-300 hover:shadow-lg hover:ring-amber-300 hover:-translate-y-0.5">
                               <div className="flex items-center justify-between">
-                                <div className="text-xs font-medium text-blue-600 uppercase tracking-wider">Commit 排名</div>
+                                <div className="text-xs font-bold text-amber-700 uppercase tracking-wider">Commit 排名</div>
                                 <Icons.Commit />
                               </div>
-                              <div className="mt-2 text-2xl font-bold text-blue-900">
+                              <div className="mt-2 text-3xl font-extrabold text-amber-700">
                                 #{ranking.commitRank.rank}
                               </div>
                             </div>
@@ -512,9 +519,9 @@ export function OrgCacheDashboard() {
                       </div>
                     </section>
                   ) : rankingLoading ? (
-                    <section className="flex items-center justify-center rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
+                    <section className="flex items-center justify-center rounded-xl border border-orange-200 bg-white p-8 shadow-sm">
                       <Icons.Loader />
-                      <span className="ml-2 text-sm text-zinc-500">正在加载排名数据...</span>
+                      <span className="ml-2 text-sm text-orange-600">正在加载排名数据...</span>
                     </section>
                   ) : null}
 
@@ -655,21 +662,21 @@ export function OrgCacheDashboard() {
                     </section>
                   </div>
 
-                  <section className="overflow-hidden rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/50 to-white shadow-sm">
-                    <div className="flex items-center justify-between border-b border-indigo-100 px-6 py-4">
+                  <section className="overflow-hidden rounded-xl border-2 border-red-200 bg-gradient-to-br from-red-50/50 via-orange-50/50 to-amber-50/50 shadow-lg">
+                    <div className="flex items-center justify-between border-b border-red-200 bg-gradient-to-r from-red-100/60 to-orange-100/60 px-6 py-4">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-indigo-950">AI 年度报告</h3>
-                          <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-medium text-indigo-600">BETA</span>
+                          <h3 className="text-lg font-bold text-red-900">🎯 AI 年度报告</h3>
+                          <span className="rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">BETA</span>
                         </div>
-                        <p className="mt-1 text-xs text-indigo-600/80">基于统计数据生成，不包含代码内容</p>
+                        <p className="mt-1 text-xs font-medium text-red-700">基于统计数据生成，不包含代码内容</p>
                       </div>
                       <div className="flex gap-3">
                         {reportResponse ? (
                           <button
                             type="button"
                             onClick={() => setShowShareCard(true)}
-                            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white px-4 text-sm font-medium text-indigo-700 shadow-sm transition-all duration-200 hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+                            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border-2 border-orange-300 bg-white px-4 text-sm font-bold text-orange-700 shadow-md transition-all duration-200 hover:bg-orange-50 hover:border-orange-400 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                             分享卡片
@@ -679,7 +686,7 @@ export function OrgCacheDashboard() {
                           type="button"
                           onClick={runReport}
                           disabled={reportLoading}
-                          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-indigo-700 hover:shadow-md hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 active:translate-y-0"
+                          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-orange-600 px-4 text-sm font-bold text-white shadow-md transition-all duration-200 hover:from-red-700 hover:to-orange-700 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 active:translate-y-0"
                         >
                           {reportLoading ? (
                             <>
@@ -711,22 +718,24 @@ export function OrgCacheDashboard() {
                             </div>
                           ) : null}
 
-                          <div className="rounded-xl bg-white/60 p-6 shadow-sm ring-1 ring-indigo-100">
-                            <div className="mb-3 flex items-center gap-2 text-xs font-medium text-indigo-500 uppercase tracking-wider">
+                          <div className="rounded-xl bg-gradient-to-br from-orange-50 to-red-50 p-6 shadow-md ring-2 ring-orange-200">
+                            <div className="mb-3 flex items-center gap-2 text-xs font-bold text-red-600 uppercase tracking-wider">
                               <Icons.Check />
                               Summary
                             </div>
-                            <div className="text-base leading-relaxed text-zinc-800">{reportResponse.report.summary}</div>
+                            <div className="text-base font-medium leading-relaxed text-zinc-800">{reportResponse.report.summary}</div>
                           </div>
 
                           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                             {reportResponse.report.highlights.length ? (
-                              <div className="rounded-xl bg-emerald-50/50 p-5 ring-1 ring-emerald-100">
-                                <div className="mb-3 text-xs font-medium text-emerald-600 uppercase tracking-wider">Highlights</div>
+                              <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 p-5 shadow-md ring-2 ring-emerald-200">
+                                <div className="mb-3 flex items-center gap-1.5 text-xs font-bold text-emerald-700 uppercase tracking-wider">
+                                  <span>✨</span> Highlights
+                                </div>
                                 <ul className="space-y-2">
                                   {reportResponse.report.highlights.map((t, idx) => (
-                                    <li key={idx} className="flex items-start gap-2 text-zinc-700">
-                                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                                    <li key={idx} className="flex items-start gap-2 font-medium text-zinc-700">
+                                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
                                       <span>{t}</span>
                                     </li>
                                   ))}
@@ -735,12 +744,14 @@ export function OrgCacheDashboard() {
                             ) : null}
 
                             {reportResponse.report.risks.length ? (
-                              <div className="rounded-xl bg-amber-50/50 p-5 ring-1 ring-amber-100">
-                                <div className="mb-3 text-xs font-medium text-amber-600 uppercase tracking-wider">Attention</div>
+                              <div className="rounded-xl bg-gradient-to-br from-amber-50 to-yellow-50 p-5 shadow-md ring-2 ring-amber-200">
+                                <div className="mb-3 flex items-center gap-1.5 text-xs font-bold text-amber-700 uppercase tracking-wider">
+                                  <span>⚠️</span> Attention
+                                </div>
                                 <ul className="space-y-2">
                                   {reportResponse.report.risks.map((t, idx) => (
-                                    <li key={idx} className="flex items-start gap-2 text-zinc-700">
-                                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
+                                    <li key={idx} className="flex items-start gap-2 font-medium text-zinc-700">
+                                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
                                       <span>{t}</span>
                                     </li>
                                   ))}
@@ -749,12 +760,14 @@ export function OrgCacheDashboard() {
                             ) : null}
 
                             {reportResponse.report.actions.length ? (
-                              <div className="rounded-xl bg-blue-50/50 p-5 ring-1 ring-blue-100">
-                                <div className="mb-3 text-xs font-medium text-blue-600 uppercase tracking-wider">Suggestions</div>
+                              <div className="rounded-xl bg-gradient-to-br from-orange-50 to-red-50 p-5 shadow-md ring-2 ring-orange-200">
+                                <div className="mb-3 flex items-center gap-1.5 text-xs font-bold text-orange-700 uppercase tracking-wider">
+                                  <span>💡</span> Suggestions
+                                </div>
                                 <ul className="space-y-2">
                                   {reportResponse.report.actions.map((t, idx) => (
-                                    <li key={idx} className="flex items-start gap-2 text-zinc-700">
-                                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400" />
+                                    <li key={idx} className="flex items-start gap-2 font-medium text-zinc-700">
+                                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
                                       <span>{t}</span>
                                     </li>
                                   ))}
@@ -763,7 +776,7 @@ export function OrgCacheDashboard() {
                             ) : null}
                           </div>
 
-                          <div className="text-right text-xs text-indigo-400">
+                          <div className="text-right text-xs font-semibold text-orange-500">
                             AI Confidence: {reportResponse.report.confidence}
                           </div>
                         </div>
