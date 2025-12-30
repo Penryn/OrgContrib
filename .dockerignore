@@ -12,3 +12,6 @@ yarn-error.log*
 Dockerfile.*
 docker-compose*.override.yml
 
+*.tar
+.DS_Store
+

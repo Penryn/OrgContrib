@@ -28,23 +28,50 @@ COPY . .
 
 RUN npm run build
 
-FROM base AS runner
+# --- Web (small) ---
+# Uses Next.js standalone output: only required node_modules are copied.
+FROM base AS web
 WORKDIR /app
+
 ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-
-# Prisma schema + migrations for `prisma migrate deploy`
-COPY --from=builder /app/prisma ./prisma
-
-# Worker runs from TS source using `tsx`
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+CMD ["node", "server.js"]
+
+# --- Worker (keeps dev deps because it runs TS via tsx) ---
+FROM base AS worker
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
+
+CMD ["npm", "run", "worker"]
+
+# --- Migrate (Prisma CLI) ---
+FROM base AS migrate
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+
+CMD ["sh", "-c", "npx prisma migrate deploy"]
 
