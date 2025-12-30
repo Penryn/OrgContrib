@@ -126,6 +126,7 @@
 - `DATABASE_URL`（Postgres）
 - `REDIS_URL`
 - `ORG_SYNC_GITHUB_TOKEN`（服务账号 token，用于 worker 启动时同步缓存）
+- `ORG_YEAR_SYNC_STARTUP_MODE`（可选，worker 启动时是否自动同步，默认 `always`；可选 `if_missing`/`never`）
 - `ORG_LOGIN`（可选，默认 `zjutjh`）
 - `ORG_CACHE_YEAR`（可选，默认按 Asia/Shanghai 取当前年）
 

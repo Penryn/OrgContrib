@@ -108,7 +108,7 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
         <div
           ref={cardRef}
           className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-900 via-red-800 to-orange-900 text-white shadow-2xl"
-          style={{ width: "400px", minHeight: "600px" }}
+          style={{ width: "400px", height: "711px" }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header Pattern - Festive decorative elements */}
@@ -122,7 +122,7 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
             className="absolute right-10 top-20 h-32 w-32 rounded-full bg-gradient-to-br from-white/10 to-transparent"
           />
 
-          <div className="relative p-8">
+          <div className="relative flex h-full flex-col p-8">
             {/* Header */}
             <div className="flex items-start justify-between">
               <div>
@@ -193,13 +193,13 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
             </div>
 
             {/* AI Summary */}
-            <div className="mt-6">
+            <div className="mt-6 flex flex-1 flex-col">
               <div className="mb-2 flex items-center gap-2 text-xs font-bold text-orange-200">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-orange-400" />
                 AI Summary
               </div>
               <div
-                className="relative flex flex-col justify-center rounded-xl bg-white/10 px-8 py-10 text-left text-base font-medium leading-relaxed text-orange-50 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
+                className="relative flex flex-1 flex-col justify-center rounded-xl bg-white/10 px-8 py-10 text-left text-base font-medium leading-relaxed text-orange-50 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
               >
                 <span
                   className={`pointer-events-none select-none absolute left-4 top-2 text-5xl ${

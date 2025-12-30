@@ -51,6 +51,12 @@ cp .env.example .env
 - `DATABASE_URL`
 - `REDIS_URL`
 
+可选（组织缓存启动同步行为）：
+- `ORG_YEAR_SYNC_STARTUP_MODE`：worker 启动时是否自动触发组织年度缓存同步
+   - `always`（默认）：每次 worker 启动都触发一次同步
+   - `if_missing`：如果该 `org/year` 缓存已是 `completed` 则跳过启动同步
+   - `never`：完全禁用启动同步（只保留手动 `POST /api/org-cache/sync`）
+
 可选（AI）：
 - `ARK_API_KEY`
 - `ARK_ENDPOINT_ID`（ep-...）

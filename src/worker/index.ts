@@ -1267,6 +1267,19 @@ const DEFAULT_TIMEZONE = "Asia/Shanghai";
 const orgYearSyncQueue = new Queue<OrgYearSyncJobData>("org-year-sync", { connection });
 
 async function ensureOrgYearSyncOnStartup(): Promise<void> {
+  const startupModeRaw = (process.env.ORG_YEAR_SYNC_STARTUP_MODE ?? "always").trim().toLowerCase();
+  const startupMode =
+    startupModeRaw === "0" || startupModeRaw === "false"
+      ? "never"
+      : startupModeRaw === "1" || startupModeRaw === "true"
+        ? "always"
+        : startupModeRaw;
+
+  if (startupMode === "never") {
+    console.log("ORG_YEAR_SYNC_STARTUP_MODE=never; skip org-year-sync on startup.");
+    return;
+  }
+
   const token = process.env.ORG_SYNC_GITHUB_TOKEN;
   if (!token) {
     console.log("ORG_SYNC_GITHUB_TOKEN missing; skip org-year-sync on startup.");
@@ -1294,10 +1307,16 @@ async function ensureOrgYearSyncOnStartup(): Promise<void> {
       },
       select: {
         status: true,
+        computedAt: true,
         to: true,
         jobId: true,
       },
     });
+
+    if (startupMode === "if_missing" && existing?.status === "completed" && existing.computedAt) {
+      console.log("org-year-sync cache already completed; skip startup enqueue.", { org, year });
+      return;
+    }
 
     if ((existing?.status === "queued" || existing?.status === "running") && existing.jobId) {
       const queuedJob = await orgYearSyncQueue.getJob(existing.jobId);
