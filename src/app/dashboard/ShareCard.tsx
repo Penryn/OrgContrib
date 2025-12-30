@@ -210,10 +210,10 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
                 AI Summary
               </div>
               <div
-                className="relative rounded-xl bg-white/10 p-5 text-sm font-medium leading-relaxed text-orange-50 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
+                className="relative rounded-xl bg-white/10 p-5 pb-10 pr-10 text-sm font-medium leading-relaxed text-orange-50 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
               >
                 <span
-                  className={`pointer-events-none select-none absolute left-2 top-1 text-4xl ${
+                  className={`pointer-events-none select-none absolute left-3 top-2 text-4xl ${
                     "text-white/20"
                   }`}
                 >
@@ -221,7 +221,7 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
                 </span>
                 {summary}
                 <span
-                  className={`pointer-events-none select-none absolute bottom-1 right-2 text-4xl ${
+                  className={`pointer-events-none select-none absolute bottom-3 right-3 text-4xl ${
                     "text-white/20"
                   }`}
                 >
