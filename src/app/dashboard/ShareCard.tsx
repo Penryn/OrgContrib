@@ -155,8 +155,6 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
               <div
                 className="relative mt-6 overflow-hidden rounded-xl bg-white/10 p-6 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
               >
-                <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-white/10" />
-
                 <div className="relative flex items-start justify-between gap-6">
                   <div>
                     <div className="text-sm font-bold text-orange-100">贡献者排名</div>
@@ -210,7 +208,7 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
                 AI Summary
               </div>
               <div
-                className="relative flex flex-col justify-center rounded-xl bg-white/10 px-8 py-10 text-left text-sm font-medium leading-relaxed text-orange-50 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
+                className="relative flex flex-col justify-center rounded-xl bg-white/10 px-8 py-10 text-left text-base font-medium leading-relaxed text-orange-50 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
               >
                 <span
                   className={`pointer-events-none select-none absolute left-4 top-2 text-5xl ${
