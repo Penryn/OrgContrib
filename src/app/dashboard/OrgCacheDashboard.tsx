@@ -291,6 +291,7 @@ export function OrgCacheDashboard() {
                   stopPolling();
                 }
                 if (next.status === "completed") {
+                  void runReport();
                   loadMe().then(() => {
                     loadRanking().catch(() => {
                       // ignore
@@ -308,6 +309,7 @@ export function OrgCacheDashboard() {
         }
 
         if (s.status === "completed") {
+          void runReport();
           loadMe().then(() => {
             loadRanking().catch(() => {
               // ignore
@@ -322,7 +324,7 @@ export function OrgCacheDashboard() {
       });
 
     return () => stopPolling();
-  }, [loadMe, loadStatus, stopPolling, loadRanking]);
+  }, [loadMe, loadStatus, stopPolling, loadRanking, runReport]);
 
   const ready = status?.status === "completed";
 
@@ -330,6 +332,8 @@ export function OrgCacheDashboard() {
     if (!status) return "组织年度缓存（PR + Review + Commit）";
     return `组织年度缓存（${status.year}）`;
   }, [status]);
+
+  const reportFailed = reportResponse?.source === "fallback" && Boolean(reportResponse.error);
 
   return (
     <div className="flex flex-col gap-8">
@@ -673,7 +677,7 @@ export function OrgCacheDashboard() {
                         <p className="mt-1 text-xs font-medium text-zinc-500">基于统计数据生成，不包含代码内容</p>
                       </div>
                       <div className="flex gap-3">
-                        {reportResponse ? (
+                        {reportResponse && !reportFailed ? (
                           <button
                             type="button"
                             onClick={() => setShowShareCard(true)}
@@ -683,24 +687,31 @@ export function OrgCacheDashboard() {
                             分享卡片
                           </button>
                         ) : null}
-                        <button
-                          type="button"
-                          onClick={runReport}
-                          disabled={reportLoading}
-                          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-orange-600 px-4 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:from-red-700 hover:to-orange-700 hover:shadow-md hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 active:translate-y-0"
-                        >
-                          {reportLoading ? (
-                            <>
-                              <Icons.Loader />
-                              <span>生成中…</span>
-                            </>
-                          ) : (
-                            <>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                              <span>生成报告</span>
-                            </>
-                          )}
-                        </button>
+                        {reportFailed ? (
+                          <button
+                            type="button"
+                            onClick={() => void runReport()}
+                            disabled={reportLoading}
+                            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-orange-600 px-4 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:from-red-700 hover:to-orange-700 hover:shadow-md hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 active:translate-y-0"
+                          >
+                            {reportLoading ? (
+                              <>
+                                <Icons.Loader />
+                                <span>重新加载中…</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                <span>重新加载</span>
+                              </>
+                            )}
+                          </button>
+                        ) : reportLoading && !reportResponse ? (
+                          <div className="inline-flex h-9 items-center gap-2 rounded-lg border border-orange-200 bg-white/70 px-3 text-sm font-medium text-orange-700 shadow-sm">
+                            <Icons.Loader />
+                            <span>生成中…</span>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
 
@@ -708,7 +719,7 @@ export function OrgCacheDashboard() {
                       {!reportResponse ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center text-zinc-400">
                           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-4 opacity-50"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                          <p className="text-sm">点击右上角“生成报告”获取你的年度总结</p>
+                          <p className="text-sm">{reportLoading ? "正在生成年度总结…" : "年度总结尚未生成"}</p>
                         </div>
                       ) : (
                         <div className="flex flex-col gap-6 text-sm">

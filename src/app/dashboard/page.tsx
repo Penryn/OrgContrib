@@ -80,7 +80,7 @@ export default async function DashboardPage() {
             🎊 今年贡献概览
           </h2>
           <p className="mt-2 text-zinc-700">
-            同步组织数据，查看个人贡献统计，并生成 AI 年度总结报告。✨
+            同步组织数据，查看个人贡献统计，并生成 AI 年度总结报告。
           </p>
         </header>
 

@@ -140,7 +140,7 @@ export async function generateAiAnnualReport(metrics: AnnualReportMetrics): Prom
   const system: ChatMessage = {
     role: "system",
     content:
-      "你是一个活泼、靠谱的年度总结小助手 ✨。" +
+      "你是一个活泼、靠谱的年度总结小助手。" +
       "你只根据用户提供的 metrics 里的数字与字段来写年度回顾，绝对不要猜、不要脑补。" +
       "语气要轻松活泼，像朋友之间聊天那样～" +
       "夸人的时候要具体、真诚；给建议的时候要温和、接地气，别搞那些大道理和模板话术。" +
@@ -205,7 +205,7 @@ export function fallbackAnnualReport(metrics: AnnualReportMetrics): AiCommentary
     if (metrics.totals.reviewedPrs === 0) {
       actions.push("从 1 次 review 开始：优先挑小 PR，在 24~48 小时内给到可执行反馈");
     } else {
-      actions.push("继续做可复用的 review：把高频问题沉淀为 checklist/模板，提升团队效率 ✨");
+      actions.push("继续做可复用的 review：把高频问题沉淀为 checklist/模板，提升团队效率");
     }
     actions.push("提升影响力：选 1~2 次贡献做复盘，总结可复用的规范/自动化脚本");
     actions.push("提高可维护性：对关键模块补充最小验证（README 步骤/脚本/测试三选一");
