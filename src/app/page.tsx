@@ -9,10 +9,9 @@ export default async function Home() {
     <main className="min-h-screen bg-zinc-50 text-zinc-900">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-10 px-6 py-16">
         <header className="flex flex-col gap-3">
-          <h1 className="text-3xl font-semibold tracking-tight">zjutjh 个人贡献看板</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">zjutjh 组织贡献看板（今年）</h1>
           <p className="text-base leading-7 text-zinc-600">
-            查看你在 <span className="font-medium text-zinc-900">zjutjh/*</span> 仓库的今年贡献（按 Asia/Shanghai），包含
-            你可访问的公开与私有仓库。
+            先同步今年 <span className="font-medium text-zinc-900">zjutjh/*</span> 仓库的 PR 与 Commit 记录（按 Asia/Shanghai），然后按人/仓库快速查看贡献并生成年度报告。
           </p>
         </header>
 
@@ -69,9 +68,7 @@ export default async function Home() {
           </section>
         )}
 
-        <footer className="text-sm text-zinc-500">
-          需求与口径：<Link className="underline" href="/spec">PROJECT_SPEC</Link>
-        </footer>
+        <footer className="text-sm text-zinc-500" />
       </div>
     </main>
   );

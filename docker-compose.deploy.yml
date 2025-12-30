@@ -41,24 +41,12 @@ services:
     build:
       context: .
     image: orgcontrib-app:latest  
+    env_file:
+      - .env
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/zjutjh?schema=public
       REDIS_URL: redis://redis:6379
-
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
-      AUTH_SECRET: ${AUTH_SECRET:-}
-
-      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
-      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
-
-      ARK_API_KEY: ${ARK_API_KEY:-}
-      ARK_BASE_URL: ${ARK_BASE_URL:-https://ark.cn-beijing.volces.com/api/v3}
-      ARK_ENDPOINT_ID: ${ARK_ENDPOINT_ID:-}
-      AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-15000}
-      AI_MAX_RETRIES: ${AI_MAX_RETRIES:-2}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -75,16 +63,12 @@ services:
       context: .
     image: orgcontrib-app:latest  
     command: ["npm", "run", "worker"]
+    env_file:
+      - .env
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/zjutjh?schema=public
       REDIS_URL: redis://redis:6379
-
-      ARK_API_KEY: ${ARK_API_KEY:-}
-      ARK_BASE_URL: ${ARK_BASE_URL:-https://ark.cn-beijing.volces.com/api/v3}
-      ARK_ENDPOINT_ID: ${ARK_ENDPOINT_ID:-}
-      AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-15000}
-      AI_MAX_RETRIES: ${AI_MAX_RETRIES:-2}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -97,4 +81,3 @@ services:
 volumes:
   postgres_data:
   redis_data:
-

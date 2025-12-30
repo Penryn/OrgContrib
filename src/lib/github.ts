@@ -21,16 +21,23 @@ export async function githubGraphql<TData>(args: {
   query: string;
   variables?: Record<string, unknown>;
 }): Promise<TData> {
-  const res = await fetch("https://api.github.com/graphql", {
-    method: "POST",
-    cache: "no-store",
-    headers: {
-      Authorization: `bearer ${args.token}`,
-      "Content-Type": "application/json",
-      Accept: "application/vnd.github+json",
-    },
-    body: JSON.stringify({ query: args.query, variables: args.variables ?? {} }),
-  });
+  let res: Response;
+  try {
+    res = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      cache: "no-store",
+      headers: {
+        Authorization: `bearer ${args.token}`,
+        "Content-Type": "application/json",
+        Accept: "application/vnd.github+json",
+      },
+      body: JSON.stringify({ query: args.query, variables: args.variables ?? {} }),
+    });
+  } catch (err) {
+    throw new Error("GitHub GraphQL request failed (https://api.github.com/graphql).", {
+      cause: err as unknown,
+    });
+  }
 
   const text = await res.text();
   let payload: unknown;

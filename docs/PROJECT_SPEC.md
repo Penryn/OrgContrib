@@ -1,8 +1,10 @@
-# zjutjh 个人贡献看板（今年）- 项目需求与实现规格
+# zjutjh 组织贡献看板（今年）- 项目需求与实现规格
 
 ## 1. 背景与目标
 
-做一个**每个人都可以查看自己**在 GitHub 组织 `zjutjh` 下仓库的代码贡献情况的 Web 应用，即使该用户**不是组织成员**也可以使用（前提：对私有仓库必须由用户本人授权且拥有访问权限）。
+做一个让任何 GitHub 用户在登录后，可以**按自己的仓库权限**查看自己在 GitHub 组织 `zjutjh` 下今年贡献情况的 Web 应用。
+
+核心思路：先用一个“全权限账号 token”把“今年”的 PR / Review / Commit 记录同步到数据库（缓存），再让用户按自身仓库权限从缓存快速汇总贡献并生成年度报告。
 
 本项目只覆盖“今年”（按 `Asia/Shanghai` 时区切年）。
 
@@ -18,19 +20,19 @@
 - **PR 贡献**
   - 口径：今年内创建的 PR 数量（唯一 PR）
 - **Code Review 贡献**
-  - 口径：今年内“review 过的 PR 数量”（按 `pullRequest.id` 去重，不按 review 次数）
+  - 口径：今年内 review 他人 PR 的数量（按 PR 去重，不按 review 次数）
 
 ### 2.2 不在 MVP 范围
 
 - Issue 贡献与 Issue/PR 评论统计
-- 组织内排行榜/对比（仅“只看自己”）
 - 基于代码内容的 AI 代码质量点评（本期只发送统计）
 
 ## 3. 权限与隐私
 
 ### 3.1 私有仓库访问边界
 
-- 私有仓库数据只能来自**用户自己的 GitHub OAuth 授权**，且仅统计该用户 Token **可访问**的 `zjutjh/*` 仓库。
+- 缓存阶段：使用 `ORG_SYNC_GITHUB_TOKEN` 同步组织仓库全量数据（包含私有仓库）。
+- 展示阶段：用户登录后，会用用户自己的 GitHub OAuth Token 拉取“可访问仓库列表”，只从缓存里筛选这些仓库的记录进行汇总与展示。
 
 ### 3.2 AI 数据边界（豆包）
 
@@ -40,42 +42,39 @@
 
 - 登录：GitHub OAuth 登录
 - Dashboard（默认 org=`zjutjh`，默认今年）
-  - 总览卡片：Commits / PRs / Reviewed PRs
-  - 趋势图：按周聚合（今年每周）
-  - Top Repos：按贡献量排序（支持切换指标）
-  - 仓库明细表：每仓库三项指标
-  - Commit 扫描进度：异步任务进度条（仓库/分支级进度）
-  - AI 点评：展示一段中文总结 + 3-5 条建议（仅基于统计）
+  - 组织年度缓存：worker 启动时同步一次今年 PR + Review + Commit 记录（异步任务 + 进度）
+  - 我的贡献：按“我可访问的仓库”筛选缓存并汇总（只显示有贡献的仓库）
+  - PR + Review + Commit：同时加载展示（未加载完成不展示仓库明细）
+  - AI 年度报告：展示中文总结 + 3-5 条建议（只基于统计）
 
 ## 5. 数据来源与计算口径
 
 ### 5.1 仓库清单（含私有）
 
-以“用户视角”拉取最稳：
+缓存同步（服务账号）拉取仓库清单：
 
 - GitHub REST：`GET /user/repos?visibility=all&affiliation=collaborator,organization_member,owner&per_page=100&page=n`
 - 过滤：`repo.owner.login === "zjutjh"`
 
 ### 5.2 PR / Review（推荐 GraphQL）
 
-- GraphQL：`viewer.contributionsCollection(organizationID, from, to)`
-  - PR：遍历 `pullRequestContributions` 得到 PR 列表并计数/按仓库聚合/按周聚合
-  - Review：遍历 `pullRequestReviewContributions`，对 `pullRequest.id` 去重得到“review 过的 PR 数”
+- GraphQL：按仓库遍历 `repository.pullRequests(orderBy: CREATED_AT)`
+  - 过滤 `createdAt` 在今年范围内
+  - 同时读取 `reviews(first: 100)` 并对 `(pullRequestId, reviewerLogin)` 去重
+  - 缓存到数据库，后续按人/仓库快速聚合
 
-### 5.3 Commit（所有分支 + 去 merge）
+### 5.3 Commit（所有分支 + 去 merge + 去重）
 
 对每个可访问仓库：
 
 1. 列出分支 `refs/heads/*`（GraphQL `repository.refs(refPrefix: "refs/heads/")`）
 2. 用分支 tip `committedDate` 过滤：tip < yearStart（UTC）直接跳过该分支
 3. 对剩余分支：
-   - `ref(name).target... on Commit { history(since, until, author:{id/emails}) { nodes { oid committedDate parents { totalCount } } } }`
+   - `ref(name).target... on Commit { history(since, until) { nodes { oid committedDate parents { totalCount } author { user { login } } } } }`
 4. 规则：
    - `parents.totalCount > 1` 视为 merge commit，丢弃
-   - 其余按 `oid` 做 Set 去重后计数
-   - 以 `committedDate` 做周聚合（按 Asia/Shanghai 分桶）
-
-> 注意：作者匹配优先使用 `emails`（来自 `GET /user/emails` 的已验证邮箱）；避免仅用 userId 导致漏统计。
+   - 其余按 `oid` 做 Set 去重后计数/落库（同一 SHA 在多个分支只记一次）
+   - 记录 `oid/committedDate/author.user.login` 以及变更统计（additions/deletions/changedFiles）
 
 ## 6. 技术栈（定稿）
 
@@ -90,10 +89,10 @@
 
 ## 7. 关键后端接口（建议）
 
-- `POST /api/snapshots/recompute`：触发今年快照计算（返回 jobId）
-- `GET /api/jobs/:id`：查询任务进度/状态
-- `GET /api/snapshots/current`：获取今年快照（若无则返回需要 recompute）
-- `POST /api/ai/commentary`：对当前快照生成 AI 点评（只基于统计）
+- `GET /api/org-cache/status`：查看组织年度缓存状态/进度
+- `GET /api/org-cache/me`：按“我可访问的仓库”汇总我的 PR/Review/Commit
+- `POST /api/org-cache/sync`：手动触发一次年度缓存同步（可选）
+- `POST /api/ai/annual-report`：基于统计生成年度报告（只基于统计）
 
 ## 8. AI 点评输出规范（只发送统计）
 
@@ -126,6 +125,9 @@
 
 - `DATABASE_URL`（Postgres）
 - `REDIS_URL`
+- `ORG_SYNC_GITHUB_TOKEN`（服务账号 token，用于 worker 启动时同步缓存）
+- `ORG_LOGIN`（可选，默认 `zjutjh`）
+- `ORG_CACHE_YEAR`（可选，默认按 Asia/Shanghai 取当前年）
 
 ### 豆包（火山方舟 Ark）
 

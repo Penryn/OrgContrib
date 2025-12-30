@@ -1,8 +1,9 @@
-# zjutjh 个人贡献看板（今年）
+# zjutjh 组织贡献看板（今年）
 
-- 目标：让任何 GitHub 用户（不要求是组织成员）查看自己在 `zjutjh/*` 仓库的今年贡献（按 `Asia/Shanghai`），包含其可访问的公开与私有仓库。
-- 指标（MVP）：PR 数、Review 过的 PR 数（按 PR 去重）；Commit（全分支、去重 SHA、排除 merge）通过异步扫描任务生成。
-- AI 点评：接入豆包（火山方舟 Ark），**只发送统计**，不发送仓库名/PR 文本/链接/代码。
+- 目标：先把组织 `zjutjh/*` 今年的 PR / Review / Commit 记录缓存到数据库，再按“用户自身仓库权限”从缓存快速汇总个人贡献，并生成年度报告。
+- 同步任务：后台 worker 启动时会用 `ORG_SYNC_GITHUB_TOKEN`（可访问组织全部仓库的账号）同步一次全量缓存。
+- 统计口径：Commit 统计 `refs/heads/*` 下所有分支，按 `SHA(oid)` 去重，并排除 merge commits（`parents > 1`）。
+- AI 年度报告：接入豆包（火山方舟 Ark），默认**只发送统计**，不发送仓库名/PR 标题/commit message/链接/代码。
 
 需求与口径：`docs/PROJECT_SPEC.md`。
 
@@ -18,6 +19,7 @@ cp .env.example .env
 - `GITHUB_CLIENT_ID`
 - `GITHUB_CLIENT_SECRET`
 - `NEXTAUTH_SECRET`
+- `ORG_SYNC_GITHUB_TOKEN`
 
 2) 启动
 
@@ -29,7 +31,7 @@ docker compose -f docker-compose.deploy.yml up -d --build
 
 - `http://localhost:3000`
 
-> 说明：`docker-compose.deploy.yml` 会自动执行 Prisma migrations（`prisma migrate deploy`），并启动 worker 用于 Commit 扫描任务。
+> 说明：`docker-compose.deploy.yml` 会自动执行 Prisma migrations（`prisma migrate deploy`），并启动 worker 用于“组织年度缓存”同步任务。
 
 ## 本地开发
 
@@ -90,14 +92,16 @@ npm run dev
 ```
 
 打开 `http://localhost:3000`，用 GitHub 登录后进入 `/dashboard`。
+worker 启动后会自动触发一次年度缓存同步；如需手动触发可调用 `POST /api/org-cache/sync`。
 
 ## 目录结构（核心）
 
 - `docs/PROJECT_SPEC.md`：需求与口径
 - `src/auth.ts`：NextAuth（GitHub OAuth）
-- `src/lib/snapshot.ts`：今年 PR/Review 统计（GraphQL contributionsCollection）
-- `src/lib/ai/commentary.ts`：豆包点评（只基于统计）
-- `src/worker/index.ts`：BullMQ worker（Commit 全分支扫描）
-- `prisma/schema.prisma`：Job/Snapshot 数据模型
+- `src/app/dashboard/OrgCacheDashboard.tsx`：Dashboard（同步状态 + 个人贡献 + 年度报告）
+- `src/app/api/org-cache/*`：组织年度缓存相关 API
+- `src/app/api/ai/annual-report`：年度报告（只基于统计）
+- `src/worker/index.ts`：BullMQ worker（org-year-sync / commit-scan）
+- `prisma/schema.prisma`：数据模型（OrgYearCache / PullRequestRecord / PullRequestReviewRecord / CommitRecord / AiAnnualReportCache）
 - `docker-compose.yml`：Postgres + Redis
 - `docker-compose.deploy.yml`：一键部署（Web + Worker + Postgres + Redis）

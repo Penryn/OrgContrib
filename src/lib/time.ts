@@ -11,6 +11,11 @@ export function getShanghaiYearStartUtc(now: Date): Date {
   return new Date(utcYearStartMs - SHANGHAI_OFFSET_MS);
 }
 
+export function getShanghaiYearStartUtcForYear(year: number): Date {
+  const utcYearStartMs = Date.UTC(year, 0, 1, 0, 0, 0);
+  return new Date(utcYearStartMs - SHANGHAI_OFFSET_MS);
+}
+
 export function getWeekStartShanghaiKey(isoDateTime: string): string {
   const date = new Date(isoDateTime);
   if (Number.isNaN(date.getTime())) {

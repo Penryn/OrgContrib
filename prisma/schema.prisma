@@ -9,9 +9,18 @@ datasource db {
 
 enum JobType {
   commit_scan
+  org_year_sync
 }
 
 enum JobStatus {
+  queued
+  running
+  completed
+  failed
+}
+
+enum CacheStatus {
+  not_started
   queued
   running
   completed
@@ -31,6 +40,30 @@ model Job {
   updatedAt DateTime  @updatedAt
 
   @@index([userLogin, createdAt])
+}
+
+model OrgYearCache {
+  id        String      @id @default(cuid())
+  org       String
+  year      Int
+  timezone  String
+  from      DateTime
+  to        DateTime
+  computedAt DateTime?
+
+  status    CacheStatus @default(not_started)
+  progress  Int         @default(0)
+  totalRepos Int?
+  message   String?
+  jobId     String?
+
+  totals Json @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([org, year])
+  @@index([org, year])
 }
 
 model Snapshot {
@@ -56,6 +89,83 @@ model Snapshot {
   @@index([org, year])
 }
 
+model PullRequestRecord {
+  id         String   @id // GitHub node id
+  org        String
+  year       Int
+  repo       String // nameWithOwner
+  number     Int
+  title      String
+  url        String
+  state      String
+  createdAt  DateTime
+  mergedAt   DateTime?
+  closedAt   DateTime?
+  isDraft    Boolean  @default(false)
+
+  authorLogin String?
+
+  additions    Int?
+  deletions    Int?
+  changedFiles Int?
+
+  createdAtLocal String? // YYYY-MM-DD (Asia/Shanghai)
+
+  @@index([org, year])
+  @@index([org, year, repo])
+  @@index([org, year, authorLogin])
+  @@unique([org, repo, number])
+}
+
+model PullRequestReviewRecord {
+  pullRequestId String // GitHub node id (PullRequestRecord.id)
+  reviewerLogin String
+
+  org   String
+  year  Int
+  repo  String // nameWithOwner
+
+  pullRequestNumber      Int
+  pullRequestTitle       String
+  pullRequestUrl         String
+  pullRequestAuthorLogin String?
+
+  reviewedAt      DateTime
+  reviewedAtLocal String? // YYYY-MM-DD (Asia/Shanghai)
+
+  @@id([pullRequestId, reviewerLogin])
+  @@index([org, year])
+  @@index([org, year, repo])
+  @@index([org, year, reviewerLogin])
+}
+
+model CommitRecord {
+  repo String // nameWithOwner
+  oid  String
+
+  org           String
+  year          Int
+  committedDate DateTime
+  url           String
+  messageHeadline String
+  isMerge       Boolean @default(false)
+
+  authorLogin String?
+  authorEmail String?
+  authorName  String?
+
+  additions    Int?
+  deletions    Int?
+  changedFiles Int?
+
+  committedDateLocal String? // YYYY-MM-DD (Asia/Shanghai)
+
+  @@id([repo, oid])
+  @@index([org, year])
+  @@index([org, year, repo])
+  @@index([org, year, authorLogin])
+}
+
 model AiCommentaryCache {
   id        String   @id @default(cuid())
   userLogin String
@@ -72,4 +182,22 @@ model AiCommentaryCache {
 
   @@unique([userLogin, org, date])
   @@index([org, date])
+}
+
+model AiAnnualReportCache {
+  id        String   @id @default(cuid())
+  userLogin String
+  org       String
+  year      Int
+
+  source  String
+  report  Json
+  metrics Json
+  error   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userLogin, org, year])
+  @@index([org, year])
 }
