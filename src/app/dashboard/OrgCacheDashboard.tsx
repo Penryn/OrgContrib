@@ -470,8 +470,8 @@ export function OrgCacheDashboard() {
                       </div>
                       <div className="px-6 py-6">
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                          <div className="rounded-xl bg-gradient-to-br from-orange-50 to-red-50 p-6 shadow-sm ring-1 ring-orange-100 transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
-                            <div className="text-center">
+                          <div className="relative flex flex-col justify-center overflow-hidden rounded-xl bg-gradient-to-br from-orange-50 to-red-50 p-6 shadow-sm ring-1 ring-orange-100 transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
+                            <div className="text-center pb-2">
                               <div className="text-sm font-bold text-orange-600 uppercase tracking-wider">总排名</div>
                               <div className="mt-3 text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-red-600 to-orange-600 transition-transform duration-300 hover:scale-110">
                                 Top {formatTopPercent(ranking.percentile)}%
@@ -479,12 +479,12 @@ export function OrgCacheDashboard() {
                               <div className="mt-3 text-base font-semibold text-zinc-700">
                                 第 {ranking.rank} 名 / 共 {ranking.totalUsers} 人
                               </div>
-                              <div className="mt-5 h-3 overflow-hidden rounded-full bg-orange-100 shadow-inner">
-                                <div
-                                  className="h-full bg-gradient-to-r from-orange-500 to-red-600 shadow-sm transition-all duration-500"
-                                  style={{ width: `${100 - formatTopPercent(ranking.percentile)}%` }}
-                                />
-                              </div>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 h-2 bg-orange-100/50">
+                              <div
+                                className="h-full bg-gradient-to-r from-orange-500 to-red-600 shadow-sm transition-all duration-500"
+                                style={{ width: `${100 - formatTopPercent(ranking.percentile)}%` }}
+                              />
                             </div>
                           </div>
                           <div className="grid grid-cols-1 gap-3">

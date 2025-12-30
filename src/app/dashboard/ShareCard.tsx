@@ -167,7 +167,7 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
                   <div className="text-right">
                     <div className="text-xs font-bold text-orange-200">排名</div>
                     <div className="mt-1 text-xl font-extrabold text-white">
-                      第 {ranking.rank} 名 / 共 {ranking.totalUsers} 人
+                      #{ranking.rank} <span className="text-sm font-medium text-white/60">/ {ranking.totalUsers}</span>
                     </div>
                   </div>
                 </div>
