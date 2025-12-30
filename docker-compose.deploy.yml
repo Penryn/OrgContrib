@@ -27,8 +27,7 @@ services:
   migrate:
     build:
       context: .
-      target: migrate
-    image: orgcontrib-migrate:latest
+    image: orgcontrib-app:latest  
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/zjutjh?schema=public
@@ -41,8 +40,7 @@ services:
   web:
     build:
       context: .
-      target: web
-    image: orgcontrib-web:latest
+    image: orgcontrib-app:latest  
     env_file:
       - .env
     environment:
@@ -63,8 +61,8 @@ services:
   worker:
     build:
       context: .
-      target: worker
-    image: orgcontrib-worker:latest
+    image: orgcontrib-app:latest  
+    command: ["npm", "run", "worker"]
     env_file:
       - .env
     environment:
