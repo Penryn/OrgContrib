@@ -33,7 +33,7 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
   const [saving, setSaving] = useState(false);
   const [hideButtons, setHideButtons] = useState(false);
   const [showAvatar, setShowAvatar] = useState(true);
-  const avatarUrl = useMemo(() => `https://github.com/${encodeURIComponent(userLogin)}.png?size=160`, [userLogin]);
+  const avatarUrl = useMemo(() => `/api/avatar/${encodeURIComponent(userLogin)}?size=160`, [userLogin]);
 
   const handleSaveImage = async () => {
     if (!cardRef.current) return;
