@@ -23,10 +23,16 @@ export async function githubGraphql<TData>(args: {
   query: string;
   variables?: Record<string, unknown>;
 }): Promise<TData> {
-  let res: Response | undefined;
+  const isRetryableStatus = (status: number): boolean => {
+    // GitHub / edge occasionally returns transient 5xx (often HTML) which should be retried.
+    return status === 500 || status === 502 || status === 503 || status === 504;
+  };
+
+  const maxAttempts = 4;
   let lastError: unknown;
 
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    let res: Response;
     try {
       res = await fetch("https://api.github.com/graphql", {
         method: "POST",
@@ -39,12 +45,10 @@ export async function githubGraphql<TData>(args: {
         body: JSON.stringify({ query: args.query, variables: args.variables ?? {} }),
         signal: AbortSignal.timeout(15000), // 15s timeout
       });
-      break; // Success
     } catch (err) {
       lastError = err;
       const isNetworkError = includesFetchFailedMessage(err);
-      if (attempt < 3 && isNetworkError) {
-        // Wait 1s, 2s...
+      if (attempt < maxAttempts && isNetworkError) {
         await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
         continue;
       }
@@ -52,22 +56,21 @@ export async function githubGraphql<TData>(args: {
         cause: err as unknown,
       });
     }
-  }
 
-  if (!res) {
-    // Should be unreachable if loop throws on last error
-    throw new Error("GitHub GraphQL request failed.", { cause: lastError });
-  }
+    const text = await res.text();
+    let payload: unknown;
+    try {
+      payload = JSON.parse(text);
+    } catch {
+      if (attempt < maxAttempts && isRetryableStatus(res.status)) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        continue;
+      }
 
-  const text = await res.text();
-  let payload: unknown;
-  try {
-    payload = JSON.parse(text);
-  } catch {
-    throw new GitHubApiError(`GitHub GraphQL returned invalid JSON (HTTP ${res.status}).`, {
-      status: res.status,
-    });
-  }
+      throw new GitHubApiError(`GitHub GraphQL returned invalid JSON (HTTP ${res.status}).`, {
+        status: res.status,
+      });
+    }
 
   const body = payload as {
     data?: TData;
@@ -75,23 +78,31 @@ export async function githubGraphql<TData>(args: {
     message?: string;
   };
 
-  if (!res.ok) {
-    throw new GitHubApiError(body.message ?? `GitHub GraphQL HTTP ${res.status}.`, {
-      status: res.status,
-      errors: body.errors,
-    });
+    if (!res.ok) {
+      if (attempt < maxAttempts && isRetryableStatus(res.status)) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        continue;
+      }
+
+      throw new GitHubApiError(body.message ?? `GitHub GraphQL HTTP ${res.status}.`, {
+        status: res.status,
+        errors: body.errors,
+      });
+    }
+
+    if (body.errors?.length) {
+      throw new GitHubApiError(body.errors[0]?.message ?? "GitHub GraphQL error.", {
+        status: res.status,
+        errors: body.errors,
+      });
+    }
+
+    if (!body.data) {
+      throw new GitHubApiError("GitHub GraphQL response missing data.", { status: res.status });
+    }
+
+    return body.data;
   }
 
-  if (body.errors?.length) {
-    throw new GitHubApiError(body.errors[0]?.message ?? "GitHub GraphQL error.", {
-      status: res.status,
-      errors: body.errors,
-    });
-  }
-
-  if (!body.data) {
-    throw new GitHubApiError("GitHub GraphQL response missing data.", { status: res.status });
-  }
-
-  return body.data;
+  throw new Error("GitHub GraphQL request failed.", { cause: lastError });
 }

@@ -14,9 +14,11 @@ type RestRepo = {
   owner: { login: string };
   archived: boolean;
   disabled: boolean;
+  pushed_at: string | null;
+  updated_at: string;
 };
 
-type RepoRef = { owner: string; name: string; fullName: string };
+type RepoRef = { owner: string; name: string; fullName: string; pushedAt: string | null };
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -139,7 +141,7 @@ async function listAccessibleOrgRepos(args: { token: string; org: string }): Pro
     for (const repo of batch) {
       if (repo.owner.login !== args.org) continue;
       if (repo.disabled) continue;
-      fromUserRepos.push({ owner: repo.owner.login, name: repo.name, fullName: repo.full_name });
+      fromUserRepos.push({ owner: repo.owner.login, name: repo.name, fullName: repo.full_name, pushedAt: repo.pushed_at });
     }
 
     if (batch.length < 100) break;
@@ -157,7 +159,7 @@ async function listAccessibleOrgRepos(args: { token: string; org: string }): Pro
     for (const repo of batch) {
       if (repo.owner.login !== args.org) continue;
       if (repo.disabled) continue;
-      fromOrgPublicRepos.push({ owner: repo.owner.login, name: repo.name, fullName: repo.full_name });
+      fromOrgPublicRepos.push({ owner: repo.owner.login, name: repo.name, fullName: repo.full_name, pushedAt: repo.pushed_at });
     }
 
     if (batch.length < 100) break;
@@ -165,7 +167,17 @@ async function listAccessibleOrgRepos(args: { token: string; org: string }): Pro
 
   const merged = new Map<string, RepoRef>();
   for (const repo of [...fromOrgPublicRepos, ...fromUserRepos]) {
-    merged.set(repo.fullName, repo);
+    const existing = merged.get(repo.fullName);
+    if (!existing) {
+      merged.set(repo.fullName, repo);
+      continue;
+    }
+
+    const existingTs = existing.pushedAt ? Date.parse(existing.pushedAt) : -1;
+    const candidateTs = repo.pushedAt ? Date.parse(repo.pushedAt) : -1;
+    if (candidateTs > existingTs) {
+      merged.set(repo.fullName, repo);
+    }
   }
 
   return Array.from(merged.values()).sort((a, b) => a.fullName.localeCompare(b.fullName));
@@ -808,6 +820,12 @@ const orgYearSyncWorker = new Worker<OrgYearSyncJobData>(
       try {
         await progress(`sync ${repo.fullName}`);
 
+        const repoPushedAt = repo.pushedAt ? Date.parse(repo.pushedAt) : -1;
+        const windowStart = Date.parse(job.data.from);
+        if (!(repoPushedAt >= windowStart)) {
+          await progress(`skip ${repo.fullName} (no activity in ${job.data.year})`);
+        } else {
+
         const prs = await listRepoPullRequests({
           token: job.data.accessToken,
           owner: repo.owner,
@@ -924,6 +942,7 @@ const orgYearSyncWorker = new Worker<OrgYearSyncJobData>(
 
         totalCommits += commitResult.inserted;
         for (const login of commitResult.contributors) contributors.add(login);
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         console.error(`${prefix} repo sync failed`, { repo: repo.fullName, message });
@@ -1109,6 +1128,12 @@ const commitScanWorker = new Worker<CommitScanJobData>(
       try {
         await progress(`扫描仓库 ${repo.fullName}`);
 
+        const repoPushedAt = repo.pushedAt ? Date.parse(repo.pushedAt) : -1;
+        const windowStart = Date.parse(job.data.from);
+        if (!(repoPushedAt >= windowStart)) {
+          await progress(`跳过仓库 ${repo.fullName}（今年无更新）`);
+        } else {
+
         const scanned = await scanRepoCommits({
           token: job.data.accessToken,
           repo,
@@ -1124,6 +1149,7 @@ const commitScanWorker = new Worker<CommitScanJobData>(
 
         for (const [week, count] of Object.entries(scanned.byWeek)) {
           commitByWeek[week] = (commitByWeek[week] ?? 0) + count;
+        }
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -1273,14 +1299,18 @@ async function ensureOrgYearSyncOnStartup(): Promise<void> {
       },
     });
 
-    if (existing?.status === "queued" || existing?.status === "running") {
-      console.log("org-year-sync already in progress; skip startup enqueue.", { org, year, jobId: existing.jobId });
-      return;
-    }
+    if ((existing?.status === "queued" || existing?.status === "running") && existing.jobId) {
+      const queuedJob = await orgYearSyncQueue.getJob(existing.jobId);
+      if (queuedJob) {
+        console.log("org-year-sync already in progress; skip startup enqueue.", { org, year, jobId: existing.jobId });
+        return;
+      }
 
-    if (existing?.status === "completed") {
-      console.log("org-year cache already completed; skip startup enqueue.", { org, year, to: existing.to.toISOString() });
-      return;
+      console.warn("org-year-sync marked in progress but missing in redis; re-enqueue on startup.", {
+        org,
+        year,
+        jobId: existing.jobId,
+      });
     }
 
     const job = await prisma.job.create({
