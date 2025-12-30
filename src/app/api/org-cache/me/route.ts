@@ -178,9 +178,12 @@ export async function GET() {
     type WeeklyStats = { week: string; prs: number; reviews: number; commits: number };
     const weeklyMap = new Map<string, WeeklyStats>();
 
+    // Helper to format date to YYYY-MM
+    const formatToYearMonth = (date: Date): string => date.toISOString().slice(0, 7);
+
     // Group PRs by week
     for (const pr of recentPrs) {
-      const weekKey = pr.createdAt.toISOString().slice(0, 10).slice(0, 7); // YYYY-MM format
+      const weekKey = formatToYearMonth(pr.createdAt);
       const existing = weeklyMap.get(weekKey) ?? { week: weekKey, prs: 0, reviews: 0, commits: 0 };
       existing.prs += 1;
       weeklyMap.set(weekKey, existing);
@@ -188,7 +191,7 @@ export async function GET() {
 
     // Group reviews by week
     for (const review of recentReviews) {
-      const weekKey = review.reviewedAt.toISOString().slice(0, 10).slice(0, 7);
+      const weekKey = formatToYearMonth(review.reviewedAt);
       const existing = weeklyMap.get(weekKey) ?? { week: weekKey, prs: 0, reviews: 0, commits: 0 };
       existing.reviews += 1;
       weeklyMap.set(weekKey, existing);
@@ -196,7 +199,7 @@ export async function GET() {
 
     // Group commits by week
     for (const commit of recentCommits) {
-      const weekKey = commit.committedDate.toISOString().slice(0, 10).slice(0, 7);
+      const weekKey = formatToYearMonth(commit.committedDate);
       const existing = weeklyMap.get(weekKey) ?? { week: weekKey, prs: 0, reviews: 0, commits: 0 };
       existing.commits += 1;
       weeklyMap.set(weekKey, existing);

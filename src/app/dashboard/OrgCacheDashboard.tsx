@@ -527,9 +527,9 @@ export function OrgCacheDashboard() {
                           <span className="ml-2 text-sm text-zinc-500">加载图表中...</span>
                         </div>
                       }>
-                        {me.byWeek && me.byWeek.length > 0 ? (
+                        {me.byWeek && me.byWeek.length > 0 && (
                           <ContributionTrendChart data={me.byWeek} />
-                        ) : null}
+                        )}
                       </Suspense>
                     </div>
                     <div className="grid grid-cols-1 gap-6">
@@ -556,9 +556,9 @@ export function OrgCacheDashboard() {
                         <span className="ml-2 text-sm text-zinc-500">加载图表中...</span>
                       </div>
                     }>
-                      {me.byRepo && me.byRepo.length > 0 ? (
+                      {me.byRepo && me.byRepo.length > 0 && (
                         <RepoContributionChart data={me.byRepo} maxRepos={10} />
-                      ) : null}
+                      )}
                     </Suspense>
                   </section>
 
