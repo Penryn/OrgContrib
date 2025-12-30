@@ -77,15 +77,6 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onClose();
-              }}
-              className="inline-flex items-center rounded-lg bg-white/20 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/30 backdrop-blur hover:bg-white/30 transition-colors"
-            >
-              关闭
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
                 void handleSaveImage();
               }}
               disabled={saving}
