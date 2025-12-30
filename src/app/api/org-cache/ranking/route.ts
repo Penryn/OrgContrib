@@ -161,7 +161,12 @@ export async function GET() {
     const commitRank = sortedByCommits.findIndex((c) => c.login === login) + 1;
 
     const totalUsers = allContributors.length;
-    const percentile = totalRank > 0 ? Math.round(((totalUsers - totalRank) / totalUsers) * 100) : 0;
+    // Top X% means you're within the first X% of contributors.
+    // Example: rank=10,total=100 => Top 10% (not Top 90%).
+    const percentile =
+      totalRank > 0 && totalUsers > 0
+        ? Math.min(100, Math.max(1, Math.ceil((totalRank / totalUsers) * 100)))
+        : 0;
 
     return NextResponse.json({
       login,

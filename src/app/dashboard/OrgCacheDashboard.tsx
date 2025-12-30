@@ -133,6 +133,11 @@ const Icons = {
   ),
 };
 
+function formatTopPercent(percentile: number): number {
+  if (!Number.isFinite(percentile)) return 0;
+  return Math.max(1, Math.min(100, Math.round(percentile)));
+}
+
 function StatusBadge(props: { status: CacheStatus }) {
   const config = (() => {
     switch (props.status) {
@@ -469,7 +474,7 @@ export function OrgCacheDashboard() {
                             <div className="text-center">
                               <div className="text-sm font-bold text-orange-600 uppercase tracking-wider">总排名</div>
                               <div className="mt-3 text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-red-600 to-orange-600 transition-transform duration-300 hover:scale-110">
-                                Top {ranking.percentile}%
+                                Top {formatTopPercent(ranking.percentile)}%
                               </div>
                               <div className="mt-3 text-base font-semibold text-zinc-700">
                                 第 {ranking.rank} 名 / 共 {ranking.totalUsers} 人
@@ -477,7 +482,7 @@ export function OrgCacheDashboard() {
                               <div className="mt-5 h-3 overflow-hidden rounded-full bg-orange-100 shadow-inner">
                                 <div
                                   className="h-full bg-gradient-to-r from-orange-500 to-red-600 shadow-sm transition-all duration-500"
-                                  style={{ width: `${100 - ranking.percentile}%` }}
+                                  style={{ width: `${100 - formatTopPercent(ranking.percentile)}%` }}
                                 />
                               </div>
                             </div>
@@ -489,7 +494,7 @@ export function OrgCacheDashboard() {
                                 <Icons.PR />
                               </div>
                               <div className="mt-2 text-3xl font-extrabold text-zinc-900">
-                                #{ranking.prRank.rank}
+                                第 {ranking.prRank.rank} 名
                               </div>
                             </div>
                             <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-orange-100 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:bg-orange-50/30">
@@ -498,7 +503,7 @@ export function OrgCacheDashboard() {
                                 <Icons.Review />
                               </div>
                               <div className="mt-2 text-3xl font-extrabold text-zinc-900">
-                                #{ranking.reviewRank.rank}
+                                第 {ranking.reviewRank.rank} 名
                               </div>
                             </div>
                             <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-orange-100 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:bg-orange-50/30">
@@ -507,7 +512,7 @@ export function OrgCacheDashboard() {
                                 <Icons.Commit />
                               </div>
                               <div className="mt-2 text-3xl font-extrabold text-zinc-900">
-                                #{ranking.commitRank.rank}
+                                第 {ranking.commitRank.rank} 名
                               </div>
                             </div>
                           </div>
