@@ -451,7 +451,7 @@ export function OrgCacheDashboard() {
                     <StatCard 
                       label="Repositories" 
                       value={String(me.scope.accessibleRepos)} 
-                      hint="Accessible Scope"
+                      hint="Contributed Repos"
                       icon={<Icons.Repo />}
                     />
                   </section>

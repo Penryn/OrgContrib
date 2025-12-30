@@ -211,7 +211,7 @@ export async function GET() {
       org,
       year,
       viewer: { login },
-      scope: { accessibleRepos: accessibleRepos.length },
+      scope: { accessibleRepos: repoRows.length },
       totals,
       byRepo: repoRows,
       byWeek,
