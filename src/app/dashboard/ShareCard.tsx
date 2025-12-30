@@ -3,9 +3,14 @@
 import { useMemo, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 
-function formatTopPercent(percentile: number): number {
-  if (!Number.isFinite(percentile)) return 0;
-  return Math.max(1, Math.min(100, Math.round(percentile)));
+const CARD_WIDTH_PX = 450;
+const CARD_HEIGHT_PX = 800; // 9:16
+
+function formatTopPercent(percentile?: number | null): string {
+  const value = typeof percentile === "number" ? percentile : Number.NaN;
+  if (!Number.isFinite(value)) return "--";
+  const rounded = Math.max(1, Math.min(100, Math.round(value)));
+  return String(rounded);
 }
 
 type ShareCardProps = {
@@ -52,6 +57,8 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
       
       const dataUrl = await toPng(el, {
         pixelRatio: 2,
+        width: CARD_WIDTH_PX,
+        height: CARD_HEIGHT_PX,
       });
 
       // Download image
@@ -108,7 +115,7 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
         <div
           ref={cardRef}
           className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-900 via-red-800 to-orange-900 text-white shadow-2xl"
-          style={{ width: "400px", height: "711px" }}
+          style={{ width: `${CARD_WIDTH_PX}px`, height: `${CARD_HEIGHT_PX}px` }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header Pattern - Festive decorative elements */}
@@ -141,31 +148,28 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
               ) : null}
             </div>
 
-            {/* Ranking Badge */}
-            {ranking && ranking.rank > 0 ? (
-              <div
-                className="relative mt-6 overflow-hidden rounded-xl bg-white/10 p-6 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
-              >
-                <div className="relative flex items-start justify-between gap-6">
-                  <div>
-                    <div className="text-sm font-bold text-orange-100">贡献者排名</div>
-                    <div className="mt-2 text-2xl font-extrabold tracking-tight text-white">
-                      Top {formatTopPercent(ranking.percentile)}%
-                    </div>
+            {/* Ranking Badge (keep layout consistent even if ranking is missing) */}
+            <div className="relative mt-5 overflow-hidden rounded-xl bg-white/10 p-6 shadow-lg ring-1 ring-white/20 backdrop-blur-sm">
+              <div className="relative flex items-start justify-between gap-6">
+                <div>
+                  <div className="text-sm font-bold text-orange-100">贡献者排名</div>
+                  <div className="mt-2 text-2xl font-extrabold tracking-tight text-white">
+                    Top {formatTopPercent(ranking?.percentile)}%
                   </div>
+                </div>
 
-                  <div className="text-right">
-                    <div className="text-sm font-bold text-orange-100">排名</div>
-                    <div className="mt-2 text-2xl font-extrabold tracking-tight text-white">
-                      {ranking.rank} <span className="text-lg text-white/60">/ {ranking.totalUsers}</span>
-                    </div>
+                <div className="text-right">
+                  <div className="text-sm font-bold text-orange-100">排名</div>
+                  <div className="mt-2 text-2xl font-extrabold tracking-tight text-white">
+                    {ranking?.rank && ranking.rank > 0 ? ranking.rank : "--"}{" "}
+                    <span className="text-lg text-white/60">/ {ranking?.totalUsers && ranking.totalUsers > 0 ? ranking.totalUsers : "--"}</span>
                   </div>
                 </div>
               </div>
-            ) : null}
+            </div>
 
             {/* Stats Grid */}
-            <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="mt-5 grid grid-cols-2 gap-4">
               <div
                 className="rounded-xl bg-white/5 p-4 shadow-md ring-1 ring-white/10"
               >
@@ -193,13 +197,13 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
             </div>
 
             {/* AI Summary */}
-            <div className="mt-6 flex flex-1 flex-col">
+            <div className="mt-5 flex flex-1 flex-col">
               <div className="mb-2 flex items-center gap-2 text-xs font-bold text-orange-200">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-orange-400" />
                 AI Summary
               </div>
               <div
-                className="relative flex flex-1 flex-col justify-center rounded-xl bg-white/10 px-8 py-10 text-left text-base font-medium leading-relaxed text-orange-50 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
+                className="relative flex flex-1 flex-col justify-center rounded-xl bg-white/10 px-8 py-6 text-left text-base font-medium leading-relaxed text-orange-50 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
               >
                 <span
                   className={`pointer-events-none select-none absolute left-4 top-2 text-5xl ${
@@ -220,7 +224,7 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
             </div>
 
             {/* Footer */}
-            <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
+            <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-6">
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-orange-200">OrgContrib</span>
                 <span className="text-[10px] text-white/40">
