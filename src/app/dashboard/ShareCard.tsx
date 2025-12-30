@@ -153,17 +153,23 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
             {/* Ranking Badge */}
             {ranking && ranking.rank > 0 ? (
               <div
-                className="mt-6 rounded-xl bg-white/10 p-6 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
+                className="relative mt-6 overflow-hidden rounded-xl bg-white/10 p-6 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
               >
-                <div className="flex flex-col items-center text-center">
-                  <div className="text-xs font-bold text-orange-200 uppercase tracking-wider">
-                    总排名
+                <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-white/10" />
+
+                <div className="relative flex items-start justify-between gap-6">
+                  <div>
+                    <div className="text-sm font-bold text-orange-100">贡献者排名</div>
+                    <div className="mt-2 text-4xl font-extrabold tracking-tight text-white">
+                      Top {formatTopPercent(ranking.percentile)}%
+                    </div>
                   </div>
-                  <div className="mt-1 text-4xl font-extrabold text-white">
-                    Top {formatTopPercent(ranking.percentile)}%
-                  </div>
-                  <div className="mt-2 text-lg font-semibold text-white">
-                    第 {ranking.rank} 名 <span className="text-white/60">/ 共 {ranking.totalUsers} 人</span>
+
+                  <div className="text-right">
+                    <div className="text-sm font-bold text-orange-100">排名</div>
+                    <div className="mt-2 text-3xl font-extrabold tracking-tight text-white">
+                      {ranking.rank} <span className="text-white/60">/ {ranking.totalUsers}</span>
+                    </div>
                   </div>
                 </div>
               </div>
