@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 
 type ShareCardProps = {
   org: string;
@@ -44,20 +44,15 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
         throw new Error("Card element not available (maybe closed during export)");
       }
       
-      const canvas = await html2canvas(el, {
-        scale: 2,
+      const dataUrl = await toPng(el, {
+        pixelRatio: 2,
         backgroundColor: "#7c2d12", // warm brown-red
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        windowWidth: 375,
-        windowHeight: 667,
       });
 
       // Download image
       const link = document.createElement("a");
       link.download = `${org}-${year}-${userLogin}-contribution.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.href = dataUrl;
       link.click();
     } catch (error) {
       console.error("Failed to save image:", error);
