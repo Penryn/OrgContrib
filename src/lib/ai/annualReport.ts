@@ -2,8 +2,15 @@ import crypto from "node:crypto";
 
 import { z } from "zod";
 
-import { aiCommentarySchema } from "@/lib/ai/commentary";
-import type { AiCommentary } from "@/lib/ai/commentary";
+export const aiCommentarySchema = z.object({
+  summary: z.string().min(1),
+  highlights: z.array(z.string()).default([]),
+  risks: z.array(z.string()).default([]),
+  actions: z.array(z.string()).min(1),
+  confidence: z.number().min(0).max(1),
+});
+
+export type AiCommentary = z.infer<typeof aiCommentarySchema>;
 
 export const annualReportMetricsSchema = z.object({
   org: z.string().min(1),
@@ -133,12 +140,16 @@ export async function generateAiAnnualReport(metrics: AnnualReportMetrics): Prom
   const system: ChatMessage = {
     role: "system",
     content:
-      "你是一位友好、务实的工程成长教练。你只能依据用户提供的年度统计指标，生成中文年度报告。" +
-      "语气要积极、鼓励、自然，避免模板化的措辞；先肯定再给建议。" +
-      "你不得编造不存在的事实，不得评价具体代码质量（因为你没有代码内容）。" +
-      "不要输出任何仓库名、PR 标题、commit message（因为输入里也没有）。" +
-      "输出必须是严格 JSON，字段为：summary(string), highlights(string[]), risks(string[]), actions(string[]), confidence(number 0~1)。" +
-      "summary 1~3 句；highlights 2~4 条；actions 3~5 条，尽量具体可执行、可量化。",
+      "你是一个轻松、靠谱的工程成长搭子。" +
+      "你只根据用户提供的 metrics 里的数字与字段来写年度回顾，绝对不要猜、不要脑补。" +
+      "语气自然一点，像在帮对方做年终复盘：先夸具体的地方，再给温和、可执行的小建议；别用模板口号、别像绩效评语。" +
+      "你看不到代码与上下文：不要评价代码质量/技术水平；也不要输出任何仓库名、PR 标题、commit message 或你编出来的例子。" +
+      "如果 metrics 里某个字段是 null 或缺失，就当作“无法判断”，不要硬推结论。" +
+      "输出必须是严格 JSON（不要 Markdown、不要代码块、不要多余文字），字段固定为：" +
+      "summary(string), highlights(string[]), risks(string[]), actions(string[]), confidence(number 0~1)。" +
+      "summary 2~4 句，像一段自然的回顾；highlights 2~4 条（每条尽量带上数字）；" +
+      "risks 1~3 条（说成“提醒/可能的坑”）；actions 3~5 条（具体、可执行、尽量可量化：频率/周期/数量）。" +
+      "confidence 依据数据完整度与一致性给分：数据越完整越高，信息越缺越低。"
   };
 
   const user: ChatMessage = {

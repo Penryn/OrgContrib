@@ -3,8 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/auth";
-import { annualReportMetricsSchema, fallbackAnnualReport, generateAiAnnualReport } from "@/lib/ai/annualReport";
-import { aiCommentarySchema } from "@/lib/ai/commentary";
+import { aiCommentarySchema, annualReportMetricsSchema, fallbackAnnualReport, generateAiAnnualReport } from "@/lib/ai/annualReport";
 import { prisma } from "@/lib/db";
 import { githubGraphql } from "@/lib/github";
 import { listAccessibleOrgRepoFullNames } from "@/lib/githubRest";
