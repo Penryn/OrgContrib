@@ -165,9 +165,9 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
                 AI Summary
               </div>
               <div className="relative rounded-xl bg-gradient-to-br from-white/10 to-white/5 p-5 text-sm leading-relaxed text-zinc-200 ring-1 ring-white/10">
-                <span className="absolute -left-1 -top-2 text-4xl text-white/10">"</span>
+                <span className="absolute -left-1 -top-2 text-4xl text-white/10">&ldquo;</span>
                 {summary}
-                <span className="absolute -bottom-4 -right-1 text-4xl text-white/10">"</span>
+                <span className="absolute -bottom-4 -right-1 text-4xl text-white/10">&rdquo;</span>
               </div>
             </div>
 
