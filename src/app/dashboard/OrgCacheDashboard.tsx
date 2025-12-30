@@ -1,7 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import { ShareCard } from "./ShareCard";
+
+// Lazy load chart components for better performance
+const ContributionTrendChart = lazy(() => 
+  import("./charts/ContributionTrendChart").then(mod => ({ default: mod.ContributionTrendChart }))
+);
+const RepoContributionChart = lazy(() => 
+  import("./charts/RepoContributionChart").then(mod => ({ default: mod.RepoContributionChart }))
+);
+const ContributionTypeChart = lazy(() => 
+  import("./charts/ContributionTypeChart").then(mod => ({ default: mod.ContributionTypeChart }))
+);
 
 type CacheStatus = "not_started" | "queued" | "running" | "completed" | "failed";
 
@@ -28,6 +39,7 @@ type MeContribResponse = {
   scope: { accessibleRepos: number };
   totals: { prs: number; reviewedPrs: number; commits: number };
   byRepo: Array<{ repo: string; prs: number; reviewedPrs: number; commits: number; total: number }>;
+  byWeek?: Array<{ week: string; prs: number; reviews: number; commits: number }>;
   recent: {
     prs: Array<{
       repo: string;
@@ -54,6 +66,17 @@ type MeContribResponse = {
     }>;
     limit: number;
   };
+};
+
+type RankingResponse = {
+  login: string;
+  rank: number;
+  totalUsers: number;
+  percentile: number;
+  totalRank: { rank: number; total: number };
+  prRank: { rank: number; total: number };
+  reviewRank: { rank: number; total: number };
+  commitRank: { rank: number; total: number };
 };
 
 type AiReport = {
@@ -137,15 +160,22 @@ function StatusBadge(props: { status: CacheStatus }) {
 
 function StatCard(props: { label: string; value: string; hint?: string; icon?: React.ReactNode }) {
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-sm">
-      <div className="flex items-start justify-between">
+    <div className="group relative overflow-hidden rounded-xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover:border-zinc-300 hover:shadow-md hover:-translate-y-0.5">
+      {/* Subtle gradient overlay on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-zinc-50/0 to-zinc-100/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      
+      <div className="relative flex items-start justify-between">
         <div>
-          <div className="text-sm font-medium text-zinc-500">{props.label}</div>
-          <div className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{props.value}</div>
+          <div className="text-sm font-medium text-zinc-500 transition-colors duration-300 group-hover:text-zinc-700">{props.label}</div>
+          <div className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 transition-all duration-300 group-hover:scale-105">{props.value}</div>
         </div>
-        {props.icon && <div className="rounded-lg bg-zinc-50 p-2 ring-1 ring-zinc-100">{props.icon}</div>}
+        {props.icon && (
+          <div className="rounded-lg bg-zinc-50 p-2 ring-1 ring-zinc-100 transition-all duration-300 group-hover:bg-zinc-100 group-hover:ring-zinc-200 group-hover:scale-110">
+            {props.icon}
+          </div>
+        )}
       </div>
-      {props.hint ? <div className="mt-3 text-xs text-zinc-400">{props.hint}</div> : null}
+      {props.hint ? <div className="relative mt-3 text-xs text-zinc-400 transition-colors duration-300 group-hover:text-zinc-500">{props.hint}</div> : null}
     </div>
   );
 }
@@ -166,6 +196,9 @@ export function OrgCacheDashboard() {
   const [me, setMe] = useState<MeContribResponse | null>(null);
   const [meLoading, setMeLoading] = useState(false);
   const [meError, setMeError] = useState<string | null>(null);
+
+  const [ranking, setRanking] = useState<RankingResponse | null>(null);
+  const [rankingLoading, setRankingLoading] = useState(false);
 
   const [reportLoading, setReportLoading] = useState(false);
   const [reportResponse, setReportResponse] = useState<AnnualReportResponse | null>(null);
@@ -207,6 +240,19 @@ export function OrgCacheDashboard() {
     }
   }, []);
 
+  const loadRanking = useCallback(async () => {
+    setRankingLoading(true);
+    try {
+      const json = await fetchJson<RankingResponse>("/api/org-cache/ranking");
+      setRanking(json);
+    } catch (err) {
+      console.error("Failed to load ranking:", err);
+      setRanking(null);
+    } finally {
+      setRankingLoading(false);
+    }
+  }, []);
+
   const runReport = useCallback(async () => {
     setReportLoading(true);
     setReportResponse(null);
@@ -243,7 +289,11 @@ export function OrgCacheDashboard() {
                   stopPolling();
                 }
                 if (next.status === "completed") {
-                  loadMe().catch(() => {
+                  loadMe().then(() => {
+                    loadRanking().catch(() => {
+                      // ignore
+                    });
+                  }).catch(() => {
                     // ignore
                   });
                 }
@@ -256,7 +306,11 @@ export function OrgCacheDashboard() {
         }
 
         if (s.status === "completed") {
-          loadMe().catch(() => {
+          loadMe().then(() => {
+            loadRanking().catch(() => {
+              // ignore
+            });
+          }).catch(() => {
             // ignore
           });
         }
@@ -266,7 +320,7 @@ export function OrgCacheDashboard() {
       });
 
     return () => stopPolling();
-  }, [loadMe, loadStatus, stopPolling]);
+  }, [loadMe, loadStatus, stopPolling, loadRanking]);
 
   const ready = status?.status === "completed";
 
@@ -402,6 +456,112 @@ export function OrgCacheDashboard() {
                     />
                   </section>
 
+                  {/* Ranking Section */}
+                  {ranking && ranking.rank > 0 ? (
+                    <section className="overflow-hidden rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 shadow-sm animate-fadeIn">
+                      <div className="border-b border-amber-200 px-6 py-4">
+                        <h3 className="font-semibold text-amber-900">🏆 贡献者排名</h3>
+                      </div>
+                      <div className="px-6 py-6">
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                          <div className="rounded-xl bg-white/60 p-6 shadow-sm ring-1 ring-amber-100 transition-all duration-300 hover:shadow-md hover:ring-amber-200">
+                            <div className="text-center">
+                              <div className="text-sm font-medium text-amber-600 uppercase tracking-wider">总排名</div>
+                              <div className="mt-3 text-5xl font-bold text-amber-900 transition-transform duration-300 hover:scale-110">Top {ranking.percentile}%</div>
+                              <div className="mt-2 text-sm text-amber-700">
+                                第 {ranking.rank} 名 / 共 {ranking.totalUsers} 人
+                              </div>
+                              <div className="mt-4 h-2 overflow-hidden rounded-full bg-amber-100">
+                                <div
+                                  className="h-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all duration-500"
+                                  style={{ width: `${100 - ranking.percentile}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 gap-3">
+                            <div className="rounded-xl bg-white/60 p-4 shadow-sm ring-1 ring-purple-100 transition-all duration-300 hover:shadow-md hover:ring-purple-200 hover:-translate-y-0.5">
+                              <div className="flex items-center justify-between">
+                                <div className="text-xs font-medium text-purple-600 uppercase tracking-wider">PR 排名</div>
+                                <Icons.PR />
+                              </div>
+                              <div className="mt-2 text-2xl font-bold text-purple-900">
+                                #{ranking.prRank.rank}
+                              </div>
+                            </div>
+                            <div className="rounded-xl bg-white/60 p-4 shadow-sm ring-1 ring-orange-100 transition-all duration-300 hover:shadow-md hover:ring-orange-200 hover:-translate-y-0.5">
+                              <div className="flex items-center justify-between">
+                                <div className="text-xs font-medium text-orange-600 uppercase tracking-wider">Review 排名</div>
+                                <Icons.Review />
+                              </div>
+                              <div className="mt-2 text-2xl font-bold text-orange-900">
+                                #{ranking.reviewRank.rank}
+                              </div>
+                            </div>
+                            <div className="rounded-xl bg-white/60 p-4 shadow-sm ring-1 ring-blue-100 transition-all duration-300 hover:shadow-md hover:ring-blue-200 hover:-translate-y-0.5">
+                              <div className="flex items-center justify-between">
+                                <div className="text-xs font-medium text-blue-600 uppercase tracking-wider">Commit 排名</div>
+                                <Icons.Commit />
+                              </div>
+                              <div className="mt-2 text-2xl font-bold text-blue-900">
+                                #{ranking.commitRank.rank}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                  ) : rankingLoading ? (
+                    <section className="flex items-center justify-center rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
+                      <Icons.Loader />
+                      <span className="ml-2 text-sm text-zinc-500">正在加载排名数据...</span>
+                    </section>
+                  ) : null}
+
+                  {/* Charts Section */}
+                  <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    <div className="lg:col-span-2">
+                      <Suspense fallback={
+                        <div className="flex items-center justify-center rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
+                          <Icons.Loader />
+                          <span className="ml-2 text-sm text-zinc-500">加载图表中...</span>
+                        </div>
+                      }>
+                        {me.byWeek && me.byWeek.length > 0 && (
+                          <ContributionTrendChart data={me.byWeek} />
+                        )}
+                      </Suspense>
+                    </div>
+                    <div className="grid grid-cols-1 gap-6">
+                      <Suspense fallback={
+                        <div className="flex items-center justify-center rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
+                          <Icons.Loader />
+                        </div>
+                      }>
+                        <ContributionTypeChart 
+                          data={{
+                            prs: me.totals.prs,
+                            reviews: me.totals.reviewedPrs,
+                            commits: me.totals.commits,
+                          }}
+                        />
+                      </Suspense>
+                    </div>
+                  </section>
+
+                  <section className="grid grid-cols-1 gap-6">
+                    <Suspense fallback={
+                      <div className="flex items-center justify-center rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
+                        <Icons.Loader />
+                        <span className="ml-2 text-sm text-zinc-500">加载图表中...</span>
+                      </div>
+                    }>
+                      {me.byRepo && me.byRepo.length > 0 && (
+                        <RepoContributionChart data={me.byRepo} maxRepos={10} />
+                      )}
+                    </Suspense>
+                  </section>
+
                   <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                     <section className="col-span-1 flex flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm lg:col-span-2">
                       <div className="flex shrink-0 items-center justify-between border-b border-zinc-200 px-6 py-4">
@@ -423,13 +583,13 @@ export function OrgCacheDashboard() {
                           </thead>
                           <tbody className="divide-y divide-zinc-100">
                             {me.byRepo.slice(0, 60).map((row) => (
-                              <tr key={row.repo} className="group hover:bg-zinc-50/50">
-                                <td className="px-6 py-3 font-medium text-zinc-900 group-hover:text-blue-600 transition-colors">
+                              <tr key={row.repo} className="group transition-colors duration-150 hover:bg-zinc-50/80">
+                                <td className="px-6 py-3 font-medium text-zinc-900 transition-colors duration-150 group-hover:text-blue-600">
                                   {row.repo}
                                 </td>
-                                <td className="px-6 py-3 text-right text-zinc-600">{row.prs}</td>
-                                <td className="px-6 py-3 text-right text-zinc-600">{row.reviewedPrs}</td>
-                                <td className="px-6 py-3 text-right text-zinc-600">{row.commits}</td>
+                                <td className="px-6 py-3 text-right text-zinc-600 transition-colors duration-150 group-hover:text-zinc-900">{row.prs}</td>
+                                <td className="px-6 py-3 text-right text-zinc-600 transition-colors duration-150 group-hover:text-zinc-900">{row.reviewedPrs}</td>
+                                <td className="px-6 py-3 text-right text-zinc-600 transition-colors duration-150 group-hover:text-zinc-900">{row.commits}</td>
                                 <td className="px-6 py-3 text-right font-medium text-zinc-900">{row.total}</td>
                               </tr>
                             ))}
@@ -447,8 +607,8 @@ export function OrgCacheDashboard() {
                           {me.recent.prs.length ? (
                             <ul className="space-y-1">
                               {me.recent.prs.map((pr) => (
-                                <li key={`${pr.repo}#${pr.number}`} className="group flex flex-col gap-1 rounded-lg p-3 hover:bg-zinc-50">
-                                  <a className="truncate text-sm font-medium text-zinc-900 group-hover:text-blue-600 group-hover:underline" href={pr.url} target="_blank" rel="noreferrer">
+                                <li key={`${pr.repo}#${pr.number}`} className="group flex flex-col gap-1 rounded-lg p-3 transition-all duration-200 hover:bg-zinc-50 hover:shadow-sm">
+                                  <a className="truncate text-sm font-medium text-zinc-900 transition-colors duration-200 group-hover:text-blue-600 group-hover:underline" href={pr.url} target="_blank" rel="noreferrer">
                                     {pr.title}
                                   </a>
                                   <div className="flex items-center gap-2 text-xs text-zinc-500">
@@ -475,8 +635,8 @@ export function OrgCacheDashboard() {
                           {me.recent.reviews.length ? (
                             <ul className="space-y-1">
                               {me.recent.reviews.map((r) => (
-                                <li key={`${r.repo}#${r.number}@${r.reviewedAt}`} className="group flex flex-col gap-1 rounded-lg p-3 hover:bg-zinc-50">
-                                  <a className="truncate text-sm font-medium text-zinc-900 group-hover:text-blue-600 group-hover:underline" href={r.url} target="_blank" rel="noreferrer">
+                                <li key={`${r.repo}#${r.number}@${r.reviewedAt}`} className="group flex flex-col gap-1 rounded-lg p-3 transition-all duration-200 hover:bg-zinc-50 hover:shadow-sm">
+                                  <a className="truncate text-sm font-medium text-zinc-900 transition-colors duration-200 group-hover:text-blue-600 group-hover:underline" href={r.url} target="_blank" rel="noreferrer">
                                     {r.title}
                                   </a>
                                   <div className="flex items-center gap-2 text-xs text-zinc-500">
@@ -509,7 +669,7 @@ export function OrgCacheDashboard() {
                           <button
                             type="button"
                             onClick={() => setShowShareCard(true)}
-                            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white px-4 text-sm font-medium text-indigo-700 shadow-sm hover:bg-indigo-50 transition-colors"
+                            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white px-4 text-sm font-medium text-indigo-700 shadow-sm transition-all duration-200 hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                             分享卡片
@@ -519,7 +679,7 @@ export function OrgCacheDashboard() {
                           type="button"
                           onClick={runReport}
                           disabled={reportLoading}
-                          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+                          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-indigo-700 hover:shadow-md hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 active:translate-y-0"
                         >
                           {reportLoading ? (
                             <>
@@ -627,6 +787,11 @@ export function OrgCacheDashboard() {
             accessibleRepos: me.scope.accessibleRepos,
           }}
           summary={reportResponse.report.summary}
+          ranking={ranking ? {
+            percentile: ranking.percentile,
+            rank: ranking.rank,
+            totalUsers: ranking.totalUsers,
+          } : null}
           onClose={() => setShowShareCard(false)}
         />
       ) : null}
