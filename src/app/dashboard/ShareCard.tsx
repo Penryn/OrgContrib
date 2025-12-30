@@ -117,7 +117,7 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
         <div
           ref={cardRef}
           className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-900 via-red-800 to-orange-900 text-white shadow-2xl"
-          style={{ width: "375px", minHeight: "667px" }}
+          style={{ width: "400px", minHeight: "600px" }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header Pattern - Festive decorative elements */}
@@ -160,15 +160,15 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
                 <div className="relative flex items-start justify-between gap-6">
                   <div>
                     <div className="text-sm font-bold text-orange-100">贡献者排名</div>
-                    <div className="mt-2 text-4xl font-extrabold tracking-tight text-white">
+                    <div className="mt-2 text-2xl font-extrabold tracking-tight text-white">
                       Top {formatTopPercent(ranking.percentile)}%
                     </div>
                   </div>
 
                   <div className="text-right">
                     <div className="text-sm font-bold text-orange-100">排名</div>
-                    <div className="mt-2 text-3xl font-extrabold tracking-tight text-white">
-                      {ranking.rank} <span className="text-white/60">/ {ranking.totalUsers}</span>
+                    <div className="mt-2 text-2xl font-extrabold tracking-tight text-white">
+                      {ranking.rank} <span className="text-lg text-white/60">/ {ranking.totalUsers}</span>
                     </div>
                   </div>
                 </div>
@@ -210,10 +210,10 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
                 AI Summary
               </div>
               <div
-                className="relative rounded-xl bg-white/10 p-5 pb-10 pr-10 text-sm font-medium leading-relaxed text-orange-50 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
+                className="relative flex flex-col items-center justify-center rounded-xl bg-white/10 px-8 py-10 text-center text-sm font-medium leading-relaxed text-orange-50 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
               >
                 <span
-                  className={`pointer-events-none select-none absolute left-3 top-2 text-4xl ${
+                  className={`pointer-events-none select-none absolute left-4 top-2 text-5xl ${
                     "text-white/20"
                   }`}
                 >
@@ -221,7 +221,7 @@ export function ShareCard({ org, year, userLogin, totals, summary, ranking, onCl
                 </span>
                 {summary}
                 <span
-                  className={`pointer-events-none select-none absolute bottom-3 right-3 text-4xl ${
+                  className={`pointer-events-none select-none absolute bottom-[-10px] right-4 text-5xl ${
                     "text-white/20"
                   }`}
                 >
