@@ -1,3 +1,5 @@
+import { includesFetchFailedMessage } from "./errors";
+
 export type GitHubGraphqlErrorItem = {
   message: string;
   path?: Array<string | number>;
@@ -21,22 +23,40 @@ export async function githubGraphql<TData>(args: {
   query: string;
   variables?: Record<string, unknown>;
 }): Promise<TData> {
-  let res: Response;
-  try {
-    res = await fetch("https://api.github.com/graphql", {
-      method: "POST",
-      cache: "no-store",
-      headers: {
-        Authorization: `bearer ${args.token}`,
-        "Content-Type": "application/json",
-        Accept: "application/vnd.github+json",
-      },
-      body: JSON.stringify({ query: args.query, variables: args.variables ?? {} }),
-    });
-  } catch (err) {
-    throw new Error("GitHub GraphQL request failed (https://api.github.com/graphql).", {
-      cause: err as unknown,
-    });
+  let res: Response | undefined;
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      res = await fetch("https://api.github.com/graphql", {
+        method: "POST",
+        cache: "no-store",
+        headers: {
+          Authorization: `bearer ${args.token}`,
+          "Content-Type": "application/json",
+          Accept: "application/vnd.github+json",
+        },
+        body: JSON.stringify({ query: args.query, variables: args.variables ?? {} }),
+        signal: AbortSignal.timeout(15000), // 15s timeout
+      });
+      break; // Success
+    } catch (err) {
+      lastError = err;
+      const isNetworkError = includesFetchFailedMessage(err);
+      if (attempt < 3 && isNetworkError) {
+        // Wait 1s, 2s...
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        continue;
+      }
+      throw new Error("GitHub GraphQL request failed (https://api.github.com/graphql).", {
+        cause: err as unknown,
+      });
+    }
+  }
+
+  if (!res) {
+    // Should be unreachable if loop throws on last error
+    throw new Error("GitHub GraphQL request failed.", { cause: lastError });
   }
 
   const text = await res.text();
