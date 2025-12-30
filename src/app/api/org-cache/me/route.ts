@@ -174,6 +174,36 @@ export async function GET() {
       { prs: 0, reviewedPrs: 0, commits: 0 },
     );
 
+    // Calculate weekly contributions for charts
+    type WeeklyStats = { week: string; prs: number; reviews: number; commits: number };
+    const weeklyMap = new Map<string, WeeklyStats>();
+
+    // Group PRs by week
+    for (const pr of recentPrs) {
+      const weekKey = pr.createdAt.toISOString().slice(0, 10).slice(0, 7); // YYYY-MM format
+      const existing = weeklyMap.get(weekKey) ?? { week: weekKey, prs: 0, reviews: 0, commits: 0 };
+      existing.prs += 1;
+      weeklyMap.set(weekKey, existing);
+    }
+
+    // Group reviews by week
+    for (const review of recentReviews) {
+      const weekKey = review.reviewedAt.toISOString().slice(0, 10).slice(0, 7);
+      const existing = weeklyMap.get(weekKey) ?? { week: weekKey, prs: 0, reviews: 0, commits: 0 };
+      existing.reviews += 1;
+      weeklyMap.set(weekKey, existing);
+    }
+
+    // Group commits by week
+    for (const commit of recentCommits) {
+      const weekKey = commit.committedDate.toISOString().slice(0, 10).slice(0, 7);
+      const existing = weeklyMap.get(weekKey) ?? { week: weekKey, prs: 0, reviews: 0, commits: 0 };
+      existing.commits += 1;
+      weeklyMap.set(weekKey, existing);
+    }
+
+    const byWeek = Array.from(weeklyMap.values()).sort((a, b) => a.week.localeCompare(b.week));
+
     return NextResponse.json({
       org,
       year,
@@ -181,6 +211,7 @@ export async function GET() {
       scope: { accessibleRepos: accessibleRepos.length },
       totals,
       byRepo: repoRows,
+      byWeek,
       recent: {
         prs: recentPrs.map((pr) => ({
           repo: pr.repo,
